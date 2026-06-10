@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCartStore } from '../store/cartStore';
-import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2 } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
-import { createOrder } from '../lib/orderApi';
+import { createOrder, fetchOrderStatus, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
 import { formatPrice } from '../lib/format';
 
 type Status = 'idle' | 'placing' | 'error' | 'success';
@@ -19,6 +19,25 @@ export function CartDrawer({ currency }: CartDrawerProps) {
   const [tableNumber, setTableNumber] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [reference, setReference] = useState('');
+  const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
+  const [trackStatus, setTrackStatus] = useState<TrackStatus>('pending');
+
+  // Poll the order status so the customer follows it live (anon can't subscribe
+  // to the orders table, so we poll the capability-scoped RPC every few seconds).
+  useEffect(() => {
+    if (status !== 'success' || !placedOrder || placedOrder.source !== 'remote') return;
+    let active = true;
+    const poll = async () => {
+      const s = await fetchOrderStatus(placedOrder.id);
+      if (active && s) setTrackStatus(s);
+    };
+    poll();
+    const iv = window.setInterval(poll, 6000);
+    return () => {
+      active = false;
+      window.clearInterval(iv);
+    };
+  }, [status, placedOrder]);
 
   if (!isDrawerOpen) return null;
 
@@ -26,6 +45,8 @@ export function CartDrawer({ currency }: CartDrawerProps) {
     setStatus('idle');
     setReference('');
     setTableNumber('');
+    setPlacedOrder(null);
+    setTrackStatus('pending');
     toggleDrawer();
   };
 
@@ -40,12 +61,25 @@ export function CartDrawer({ currency }: CartDrawerProps) {
         tableNumber,
       });
       setReference(order.reference);
+      setPlacedOrder(order);
+      setTrackStatus('pending');
       clearCart();
       setStatus('success');
     } catch {
       setStatus('error');
     }
   };
+
+  // Maps the order status to a 0-based step in the tracker (cancelled = -1).
+  const trackStep = trackStatus === 'cancelled' ? -1
+    : trackStatus === 'completed' ? 2
+    : trackStatus === 'accepted' ? 1
+    : 0;
+  const trackSteps = [
+    { key: 'order.track.received' as const, Icon: Clock },
+    { key: 'order.track.preparing' as const, Icon: ChefHat },
+    { key: 'order.track.ready' as const, Icon: PackageCheck },
+  ];
 
   return (
     <>
@@ -100,6 +134,45 @@ export function CartDrawer({ currency }: CartDrawerProps) {
             </div>
             <h3 style={{ fontSize: 'var(--font-lg)' }}>{t('order.successTitle')}</h3>
             <p style={{ color: 'var(--text-secondary)' }}>{t('order.successDesc', { ref: reference })}</p>
+
+            {/* Live status tracker (only meaningful for a real backend order). */}
+            {placedOrder?.source === 'remote' && (
+              trackStatus === 'cancelled' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', color: 'var(--primary-red, #ef4444)', marginTop: 'var(--space-sm)' }}>
+                  <XCircle size={20} /> {t('order.track.cancelled')}
+                </div>
+              ) : (
+                <div style={{ width: '100%', marginTop: 'var(--space-md)' }}>
+                  <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)' }}>{t('order.track.title')}</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                    {trackSteps.map((step, i) => {
+                      const reached = i <= trackStep;
+                      return (
+                        <div key={step.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}>
+                          {i > 0 && (
+                            <div style={{ position: 'absolute', top: 18, right: '50%', width: '100%', height: 2, background: i <= trackStep ? 'var(--primary-accent)' : 'var(--border-glass)' }} />
+                          )}
+                          <div style={{
+                            width: 36, height: 36, borderRadius: 'var(--radius-full)', zIndex: 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: reached ? 'var(--gradient-brand)' : 'var(--bg-surface-elevated)',
+                            color: reached ? 'white' : 'var(--text-secondary)',
+                            boxShadow: i === trackStep ? 'var(--shadow-glow)' : 'none',
+                            transition: 'all var(--transition-fast)',
+                          }}>
+                            <step.Icon size={18} />
+                          </div>
+                          <span style={{ fontSize: 'var(--font-xs)', color: reached ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: i === trackStep ? 700 : 400 }}>
+                            {t(step.key)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            )}
+
             <button className="btn-primary" style={{ width: '100%', marginTop: 'var(--space-md)' }} onClick={closeDrawer}>
               {t('order.done')}
             </button>

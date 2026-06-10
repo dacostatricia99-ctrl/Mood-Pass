@@ -8,6 +8,20 @@ export interface PlacedOrder {
   source: 'remote' | 'local';
 }
 
+export type TrackStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
+
+/**
+ * Reads the current status of a single order by id, for customer tracking.
+ * Uses the `get_order_status` RPC (SECURITY DEFINER) since anonymous customers
+ * cannot SELECT the orders table directly. Returns null when unavailable.
+ */
+export async function fetchOrderStatus(orderId: string): Promise<TrackStatus | null> {
+  if (!supabase || !UUID_RE.test(orderId)) return null;
+  const { data, error } = await supabase.rpc('get_order_status', { order_id: orderId });
+  if (error) return null;
+  return (data as TrackStatus | null) ?? null;
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function shortRef(id: string): string {

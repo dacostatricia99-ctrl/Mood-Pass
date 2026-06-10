@@ -57,6 +57,11 @@ export type TranslationKey =
   | 'order.successDesc'
   | 'order.error'
   | 'order.done'
+  | 'order.track.title'
+  | 'order.track.received'
+  | 'order.track.preparing'
+  | 'order.track.ready'
+  | 'order.track.cancelled'
   // App fallback
   | 'home.scanPrompt'
   // Onboarding
@@ -160,6 +165,11 @@ export const translations: Record<Language, Dictionary> = {
     'order.successDesc': 'Votre commande {ref} a bien été reçue. Le restaurant la prépare.',
     'order.error': "L'envoi a échoué. Veuillez réessayer.",
     'order.done': 'Terminer',
+    'order.track.title': 'Suivi de votre commande',
+    'order.track.received': 'Reçue',
+    'order.track.preparing': 'En préparation',
+    'order.track.ready': 'Prête',
+    'order.track.cancelled': 'Commande annulée',
     'home.scanPrompt': "Veuillez scanner le QR Code d'un établissement pour accéder à son menu.",
     'onboarding.title': 'Créer votre Menu',
     'onboarding.subtitle': "Laissez l'IA faire le travail. Prenez votre menu en photo, nous nous occupons du reste.",
@@ -255,6 +265,11 @@ export const translations: Record<Language, Dictionary> = {
     'order.successDesc': 'Your order {ref} has been received. The restaurant is preparing it.',
     'order.error': 'Sending failed. Please try again.',
     'order.done': 'Done',
+    'order.track.title': 'Track your order',
+    'order.track.received': 'Received',
+    'order.track.preparing': 'Preparing',
+    'order.track.ready': 'Ready',
+    'order.track.cancelled': 'Order cancelled',
     'home.scanPrompt': "Please scan an establishment's QR code to access its menu.",
     'onboarding.title': 'Create your Menu',
     'onboarding.subtitle': 'Let AI do the work. Take a photo of your menu and we handle the rest.',
@@ -350,6 +365,11 @@ export const translations: Record<Language, Dictionary> = {
     'order.successDesc': 'تم استلام طلبك {ref}. المطعم يقوم بتحضيره.',
     'order.error': 'فشل الإرسال. يرجى المحاولة مرة أخرى.',
     'order.done': 'تم',
+    'order.track.title': 'تتبع طلبك',
+    'order.track.received': 'تم الاستلام',
+    'order.track.preparing': 'قيد التحضير',
+    'order.track.ready': 'جاهز',
+    'order.track.cancelled': 'تم إلغاء الطلب',
     'home.scanPrompt': 'يرجى مسح رمز QR الخاص بالمنشأة للوصول إلى قائمتها.',
     'onboarding.title': 'أنشئ قائمتك',
     'onboarding.subtitle': 'دع الذكاء الاصطناعي يقوم بالعمل. التقط صورة لقائمتك وسنتولى الباقي.',
@@ -445,6 +465,11 @@ export const translations: Record<Language, Dictionary> = {
     'order.successDesc': 'O seu pedido {ref} foi recebido. O restaurante está a prepará-lo.',
     'order.error': 'O envio falhou. Tente novamente.',
     'order.done': 'Concluir',
+    'order.track.title': 'Acompanhe o seu pedido',
+    'order.track.received': 'Recebido',
+    'order.track.preparing': 'Em preparação',
+    'order.track.ready': 'Pronto',
+    'order.track.cancelled': 'Pedido cancelado',
     'home.scanPrompt': 'Leia o código QR de um estabelecimento para aceder ao seu menu.',
     'onboarding.title': 'Criar o seu Menu',
     'onboarding.subtitle': 'Deixe a IA fazer o trabalho. Tire uma foto do seu menu e nós tratamos do resto.',
@@ -540,6 +565,11 @@ export const translations: Record<Language, Dictionary> = {
     'order.successDesc': '您的订单 {ref} 已收到。餐厅正在准备中。',
     'order.error': '发送失败，请重试。',
     'order.done': '完成',
+    'order.track.title': '订单追踪',
+    'order.track.received': '已接收',
+    'order.track.preparing': '制作中',
+    'order.track.ready': '已就绪',
+    'order.track.cancelled': '订单已取消',
     'home.scanPrompt': '请扫描商家的二维码以查看其菜单。',
     'onboarding.title': '创建您的菜单',
     'onboarding.subtitle': '让 AI 来完成工作。拍下您的菜单照片，其余的交给我们。',
