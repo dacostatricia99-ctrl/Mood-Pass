@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadCloud, CheckCircle, Loader2 } from 'lucide-react';
+import QRCode from 'qrcode';
+import { UploadCloud, CheckCircle, Loader2, Download } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { useAuth } from '../lib/AuthContext';
@@ -15,7 +16,26 @@ export function Onboarding() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<OnboardingResult | null>(null);
   const [error, setError] = useState('');
+  const [qrUrl, setQrUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Once the menu is created, build a QR code pointing at the customer page so
+  // the manager can immediately print it / put it on tables.
+  const menuUrl = result ? `${window.location.origin}/e/${result.slug}` : '';
+  useEffect(() => {
+    if (!menuUrl) return;
+    QRCode.toDataURL(menuUrl, { width: 512, margin: 2, color: { dark: '#ef4444', light: '#ffffff' } })
+      .then(setQrUrl)
+      .catch(() => setQrUrl(''));
+  }, [menuUrl]);
+
+  const handleDownloadQr = () => {
+    if (!qrUrl) return;
+    const a = document.createElement('a');
+    a.href = qrUrl;
+    a.download = `mood-pass-${result?.slug ?? 'menu'}-qr.png`;
+    a.click();
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -119,9 +139,21 @@ export function Onboarding() {
               <CheckCircle size={32} />
             </div>
             <h3 style={{ fontSize: 'var(--font-lg)', marginBottom: 'var(--space-sm)' }}>{t('onboarding.doneTitle')}</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)' }}>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
               {t('onboarding.doneDesc', { categories: result.categoryCount, products: result.productCount })}
             </p>
+
+            {/* QR code for the new menu — the manager's main takeaway. */}
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', marginBottom: 'var(--space-sm)' }}>{t('qr.description')}</p>
+            {qrUrl && (
+              <div style={{ background: 'white', padding: 'var(--space-sm)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', marginBottom: 'var(--space-sm)' }}>
+                <img src={qrUrl} alt="QR code" width={200} height={200} style={{ display: 'block', width: 200, height: 200 }} />
+              </div>
+            )}
+            <button onClick={handleDownloadQr} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontWeight: 600, fontSize: 'var(--font-sm)', marginBottom: 'var(--space-lg)' }}>
+              <Download size={16} /> {t('qr.download')}
+            </button>
+
             <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate(`/e/${result.slug}`)}>
               {t('onboarding.viewEstablishment')}
             </button>
