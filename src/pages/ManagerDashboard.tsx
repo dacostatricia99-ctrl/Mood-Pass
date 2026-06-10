@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode } from 'lucide-react';
+import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode, BellRing } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { QRCodeModal } from '../components/QRCodeModal';
 import { LanguageSelect } from '../components/LanguageSelect';
@@ -8,6 +8,7 @@ import { OrdersList } from '../components/OrdersList';
 import { MenuEditor } from '../components/MenuEditor';
 import { useAuth } from '../lib/AuthContext';
 import { fetchEstablishmentBySlug, countPendingOrders, sendManagerQuery, subscribeToOrders } from '../lib/managerApi';
+import { playOrderChime, requestNotificationPermission, showOrderNotification } from '../lib/notifications';
 import type { TranslationKey } from '../i18n/translations';
 
 type View = 'assistant' | 'orders' | 'menu';
@@ -35,8 +36,19 @@ export function ManagerDashboard() {
   const [currency, setCurrency] = useState('FCFA');
   const [ordersRefreshKey, setOrdersRefreshKey] = useState(0);
   const [showQR, setShowQR] = useState(false);
+  const [newOrderToast, setNewOrderToast] = useState(false);
   // Demo mode shows a static placeholder; real mode loads the count below.
   const [pendingCount, setPendingCount] = useState<number | null>(isConfigured ? null : 4);
+
+  // Keep the latest `t` reachable from the realtime callback without making the
+  // subscription depend on it (which would re-subscribe on every language change).
+  const tRef = useRef(t);
+  tRef.current = t;
+
+  // Ask for browser-notification permission once on the dashboard.
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
 
   // Resolve the establishment (id + currency) and load its pending-order count.
   useEffect(() => {
@@ -63,9 +75,18 @@ export function ManagerDashboard() {
   // Live updates: refresh the pending count and signal the orders list on any change.
   useEffect(() => {
     if (!isConfigured || !establishmentId) return;
-    return subscribeToOrders(establishmentId, () => {
+    return subscribeToOrders(establishmentId, (event) => {
       countPendingOrders(establishmentId).then(setPendingCount);
       setOrdersRefreshKey((k) => k + 1);
+      // A brand-new customer order: alert the manager (chime + browser
+      // notification + on-screen toast). Status updates (their own actions)
+      // arrive as UPDATE and stay silent.
+      if (event === 'INSERT') {
+        playOrderChime();
+        showOrderNotification(tRef.current('notify.newOrderTitle'), tRef.current('notify.newOrderBody'));
+        setNewOrderToast(true);
+        window.setTimeout(() => setNewOrderToast(false), 5000);
+      }
     });
   }, [isConfigured, establishmentId]);
 
@@ -130,6 +151,23 @@ export function ManagerDashboard() {
 
       {showQR && slug && (
         <QRCodeModal slug={slug} onClose={() => setShowQR(false)} />
+      )}
+
+      {/* New-order toast */}
+      {newOrderToast && (
+        <button
+          onClick={() => { setView('orders'); setNewOrderToast(false); }}
+          style={{
+            position: 'fixed', top: 'calc(var(--space-md) + env(safe-area-inset-top))', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 90, display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
+            background: 'var(--gradient-brand)', color: 'white', border: 'none', cursor: 'pointer',
+            padding: '12px 18px', borderRadius: 'var(--radius-full)', boxShadow: 'var(--shadow-glow)', fontWeight: 600,
+            animation: 'slideDownToast 0.3s ease-out',
+          }}
+        >
+          <BellRing size={18} /> {t('notify.newOrderTitle')}
+          <style>{`@keyframes slideDownToast { from { transform: translate(-50%, -120%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }`}</style>
+        </button>
       )}
 
       {/* Main Content Area - Chat Interface */}

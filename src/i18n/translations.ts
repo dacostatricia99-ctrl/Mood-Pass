@@ -77,6 +77,8 @@ export type TranslationKey =
   // Manager dashboard
   | 'manager.title'
   | 'manager.greeting'
+  | 'notify.newOrderTitle'
+  | 'notify.newOrderBody'
   | 'manager.actionDone'
   | 'manager.pendingOrders'
   | 'manager.viewAll'
@@ -175,6 +177,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.generate': 'Générer mon application',
     'manager.title': 'Manager IA',
     'manager.greeting': 'Bonjour ! Que souhaitez-vous faire ? (ex: "Ajoute la Pizza 4 Fromages à 6000 FCFA")',
+    'notify.newOrderTitle': 'Nouvelle commande !',
+    'notify.newOrderBody': 'Une nouvelle commande vient d\'arriver. Touchez pour la voir.',
     'manager.actionDone': 'Action exécutée avec succès ! J\'ai bien compris votre demande : "{query}".',
     'manager.pendingOrders': 'Commandes en attente',
     'manager.viewAll': 'Voir tout',
@@ -268,6 +272,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.generate': 'Generate my app',
     'manager.title': 'AI Manager',
     'manager.greeting': 'Hello! What would you like to do? (e.g. "Add the 4 Cheese Pizza for 6000 FCFA")',
+    'notify.newOrderTitle': 'New order!',
+    'notify.newOrderBody': 'A new order just came in. Tap to view it.',
     'manager.actionDone': 'Action completed successfully! I understood your request: "{query}".',
     'manager.pendingOrders': 'Pending orders',
     'manager.viewAll': 'View all',
@@ -361,6 +367,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.generate': 'أنشئ تطبيقي',
     'manager.title': 'مدير الذكاء الاصطناعي',
     'manager.greeting': 'مرحبًا! ماذا تريد أن تفعل؟ (مثال: "أضف بيتزا 4 أجبان بسعر 6000 فرنك")',
+    'notify.newOrderTitle': 'طلب جديد!',
+    'notify.newOrderBody': 'وصل طلب جديد للتو. اضغط لعرضه.',
     'manager.actionDone': 'تم تنفيذ الإجراء بنجاح! لقد فهمت طلبك: "{query}".',
     'manager.pendingOrders': 'الطلبات المعلقة',
     'manager.viewAll': 'عرض الكل',
@@ -454,6 +462,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.generate': 'Gerar a minha aplicação',
     'manager.title': 'Gestor IA',
     'manager.greeting': 'Olá! O que deseja fazer? (ex: "Adiciona a Pizza 4 Queijos por 6000 FCFA")',
+    'notify.newOrderTitle': 'Novo pedido!',
+    'notify.newOrderBody': 'Acabou de chegar um novo pedido. Toque para ver.',
     'manager.actionDone': 'Ação executada com sucesso! Compreendi o seu pedido: "{query}".',
     'manager.pendingOrders': 'Pedidos pendentes',
     'manager.viewAll': 'Ver tudo',
@@ -547,6 +557,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.generate': '生成我的应用',
     'manager.title': 'AI 经理',
     'manager.greeting': '您好！您想做什么？（例如："添加四芝士披萨，售价 6000 FCFA"）',
+    'notify.newOrderTitle': '新订单！',
+    'notify.newOrderBody': '刚收到一个新订单，点击查看。',
     'manager.actionDone': '操作已成功执行！我已理解您的请求："{query}"。',
     'manager.pendingOrders': '待处理订单',
     'manager.viewAll': '查看全部',

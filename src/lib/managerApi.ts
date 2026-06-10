@@ -100,11 +100,17 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   if (error) throw error;
 }
 
+export type OrderChangeEvent = 'INSERT' | 'UPDATE' | 'DELETE';
+
 /**
- * Subscribes to live order changes for an establishment. Calls `onChange` on any
- * insert/update/delete. Returns an unsubscribe function (no-op without a backend).
+ * Subscribes to live order changes for an establishment. Calls `onChange` with
+ * the event type on any insert/update/delete so callers can react specifically
+ * to new orders. Returns an unsubscribe function (no-op without a backend).
  */
-export function subscribeToOrders(establishmentId: string, onChange: () => void): () => void {
+export function subscribeToOrders(
+  establishmentId: string,
+  onChange: (event: OrderChangeEvent) => void,
+): () => void {
   if (!supabase) return () => {};
   const client = supabase;
   const channel = client
@@ -112,7 +118,7 @@ export function subscribeToOrders(establishmentId: string, onChange: () => void)
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'orders', filter: `establishment_id=eq.${establishmentId}` },
-      () => onChange(),
+      (payload) => onChange(payload.eventType as OrderChangeEvent),
     )
     .subscribe();
   return () => {
