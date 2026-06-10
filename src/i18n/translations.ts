@@ -84,6 +84,11 @@ export type TranslationKey =
   | 'manager.greeting'
   | 'notify.newOrderTitle'
   | 'notify.newOrderBody'
+  | 'kitchen.title'
+  | 'kitchen.empty'
+  | 'kitchen.new'
+  | 'kitchen.start'
+  | 'kitchen.markReady'
   | 'manager.actionDone'
   | 'manager.pendingOrders'
   | 'manager.viewAll'
@@ -189,6 +194,11 @@ export const translations: Record<Language, Dictionary> = {
     'manager.greeting': 'Bonjour ! Que souhaitez-vous faire ? (ex: "Ajoute la Pizza 4 Fromages à 6000 FCFA")',
     'notify.newOrderTitle': 'Nouvelle commande !',
     'notify.newOrderBody': 'Une nouvelle commande vient d\'arriver. Touchez pour la voir.',
+    'kitchen.title': 'Cuisine',
+    'kitchen.empty': 'Aucune commande en cours',
+    'kitchen.new': 'Nouvelle',
+    'kitchen.start': 'Commencer',
+    'kitchen.markReady': 'Marquer prête',
     'manager.actionDone': 'Action exécutée avec succès ! J\'ai bien compris votre demande : "{query}".',
     'manager.pendingOrders': 'Commandes en attente',
     'manager.viewAll': 'Voir tout',
@@ -289,6 +299,11 @@ export const translations: Record<Language, Dictionary> = {
     'manager.greeting': 'Hello! What would you like to do? (e.g. "Add the 4 Cheese Pizza for 6000 FCFA")',
     'notify.newOrderTitle': 'New order!',
     'notify.newOrderBody': 'A new order just came in. Tap to view it.',
+    'kitchen.title': 'Kitchen',
+    'kitchen.empty': 'No orders in progress',
+    'kitchen.new': 'New',
+    'kitchen.start': 'Start',
+    'kitchen.markReady': 'Mark ready',
     'manager.actionDone': 'Action completed successfully! I understood your request: "{query}".',
     'manager.pendingOrders': 'Pending orders',
     'manager.viewAll': 'View all',
@@ -389,6 +404,11 @@ export const translations: Record<Language, Dictionary> = {
     'manager.greeting': 'مرحبًا! ماذا تريد أن تفعل؟ (مثال: "أضف بيتزا 4 أجبان بسعر 6000 فرنك")',
     'notify.newOrderTitle': 'طلب جديد!',
     'notify.newOrderBody': 'وصل طلب جديد للتو. اضغط لعرضه.',
+    'kitchen.title': 'المطبخ',
+    'kitchen.empty': 'لا توجد طلبات قيد التنفيذ',
+    'kitchen.new': 'جديد',
+    'kitchen.start': 'ابدأ',
+    'kitchen.markReady': 'جاهز',
     'manager.actionDone': 'تم تنفيذ الإجراء بنجاح! لقد فهمت طلبك: "{query}".',
     'manager.pendingOrders': 'الطلبات المعلقة',
     'manager.viewAll': 'عرض الكل',
@@ -489,6 +509,11 @@ export const translations: Record<Language, Dictionary> = {
     'manager.greeting': 'Olá! O que deseja fazer? (ex: "Adiciona a Pizza 4 Queijos por 6000 FCFA")',
     'notify.newOrderTitle': 'Novo pedido!',
     'notify.newOrderBody': 'Acabou de chegar um novo pedido. Toque para ver.',
+    'kitchen.title': 'Cozinha',
+    'kitchen.empty': 'Nenhum pedido em curso',
+    'kitchen.new': 'Novo',
+    'kitchen.start': 'Começar',
+    'kitchen.markReady': 'Marcar pronto',
     'manager.actionDone': 'Ação executada com sucesso! Compreendi o seu pedido: "{query}".',
     'manager.pendingOrders': 'Pedidos pendentes',
     'manager.viewAll': 'Ver tudo',
@@ -589,6 +614,11 @@ export const translations: Record<Language, Dictionary> = {
     'manager.greeting': '您好！您想做什么？（例如："添加四芝士披萨，售价 6000 FCFA"）',
     'notify.newOrderTitle': '新订单！',
     'notify.newOrderBody': '刚收到一个新订单，点击查看。',
+    'kitchen.title': '厨房',
+    'kitchen.empty': '暂无进行中的订单',
+    'kitchen.new': '新订单',
+    'kitchen.start': '开始制作',
+    'kitchen.markReady': '标记为就绪',
     'manager.actionDone': '操作已成功执行！我已理解您的请求："{query}"。',
     'manager.pendingOrders': '待处理订单',
     'manager.viewAll': '查看全部',

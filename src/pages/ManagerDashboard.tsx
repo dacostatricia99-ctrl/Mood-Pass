@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode, BellRing } from 'lucide-react';
+import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode, BellRing, ChefHat } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { QRCodeModal } from '../components/QRCodeModal';
 import { LanguageSelect } from '../components/LanguageSelect';
@@ -124,6 +124,18 @@ export function ManagerDashboard() {
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)' }}>
         <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>{t('manager.title')}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          {slug && (
+            <a
+              href={`/kitchen/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t('kitchen.title')}
+              aria-label={t('kitchen.title')}
+              style={{ width: 36, height: 36, borderRadius: 'var(--radius-full)', background: 'var(--bg-surface-elevated)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <ChefHat size={18} />
+            </a>
+          )}
           <button
             onClick={() => setShowQR(true)}
             title="Show QR Code"

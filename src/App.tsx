@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { EstablishmentHome } from './pages/EstablishmentHome';
 import { ManagerDashboard } from './pages/ManagerDashboard';
+import { KitchenDisplay } from './pages/KitchenDisplay';
 import { Onboarding } from './pages/Onboarding';
 import { Login } from './pages/Login';
 import { RequireAuth } from './components/RequireAuth';
@@ -28,6 +29,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
             <Route path="/manager/:slug" element={<RequireAuth><ManagerDashboard /></RequireAuth>} />
+            <Route path="/kitchen/:slug" element={<RequireAuth><KitchenDisplay /></RequireAuth>} />
             <Route path="*" element={<ScanPrompt />} />
           </Routes>
         </Router>
