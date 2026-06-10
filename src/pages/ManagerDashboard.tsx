@@ -234,10 +234,13 @@ export function ManagerDashboard() {
           <Package size={24} />
           <span style={{ fontSize: 10, fontWeight: 500 }}>{t('nav.menu')}</span>
         </button>
-        <div style={{ color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <button
+          onClick={() => setShowQR(true)}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
+        >
           <Settings size={24} />
           <span style={{ fontSize: 10, fontWeight: 500 }}>{t('nav.settings')}</span>
-        </div>
+        </button>
       </nav>
     </div>
   );
