@@ -23,7 +23,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4-turbo-preview', // or gpt-4o for speed/cost
+        model: 'gpt-4o', // current multimodal model (gpt-4-turbo-preview is retired)
         messages: [
           {
             role: 'system',
