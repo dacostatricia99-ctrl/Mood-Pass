@@ -154,8 +154,14 @@ export function Onboarding() {
               <Download size={16} /> {t('qr.download')}
             </button>
 
-            <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate(`/e/${result.slug}`)}>
-              {t('onboarding.viewEstablishment')}
+            <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate(`/manager/${result.slug}`)}>
+              {t('onboarding.goToDashboard')}
+            </button>
+            <button
+              onClick={() => navigate(`/e/${result.slug}`)}
+              style={{ marginTop: 'var(--space-sm)', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 'var(--font-sm)', textDecoration: 'underline' }}
+            >
+              {t('onboarding.previewMenu')}
             </button>
           </div>
         )}

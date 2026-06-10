@@ -2,6 +2,7 @@ import type { Product } from '../types';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../i18n/LanguageContext';
 import { formatPrice } from '../lib/format';
+import { foodEmoji } from '../lib/foodEmoji';
 
 interface ProductListProps {
   products: Product[];
@@ -30,8 +31,8 @@ export function ProductList({ products, currency }: ProductListProps) {
               style={{ width: 80, height: 80, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} 
             />
           ) : (
-            <div style={{ width: 80, height: 80, borderRadius: 'var(--radius-sm)', background: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              🍔
+            <div style={{ width: 80, height: 80, borderRadius: 'var(--radius-sm)', background: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>
+              {foodEmoji(product.name, product.description)}
             </div>
           )}
           

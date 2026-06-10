@@ -71,6 +71,8 @@ export type TranslationKey =
   | 'onboarding.doneTitle'
   | 'onboarding.doneDesc'
   | 'onboarding.viewEstablishment'
+  | 'onboarding.goToDashboard'
+  | 'onboarding.previewMenu'
   | 'onboarding.generate'
   // Manager dashboard
   | 'manager.title'
@@ -168,6 +170,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.doneTitle': 'Menu Généré !',
     'onboarding.doneDesc': '{categories} catégories et {products} produits ont été ajoutés à votre base de données avec succès.',
     'onboarding.viewEstablishment': 'Voir mon établissement',
+    'onboarding.goToDashboard': 'Aller au tableau de bord',
+    'onboarding.previewMenu': 'Voir le menu client',
     'onboarding.generate': 'Générer mon application',
     'manager.title': 'Manager IA',
     'manager.greeting': 'Bonjour ! Que souhaitez-vous faire ? (ex: "Ajoute la Pizza 4 Fromages à 6000 FCFA")',
@@ -259,6 +263,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.doneTitle': 'Menu Generated!',
     'onboarding.doneDesc': '{categories} categories and {products} products were successfully added to your database.',
     'onboarding.viewEstablishment': 'View my establishment',
+    'onboarding.goToDashboard': 'Go to dashboard',
+    'onboarding.previewMenu': 'Preview customer menu',
     'onboarding.generate': 'Generate my app',
     'manager.title': 'AI Manager',
     'manager.greeting': 'Hello! What would you like to do? (e.g. "Add the 4 Cheese Pizza for 6000 FCFA")',
@@ -350,6 +356,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.doneTitle': 'تم إنشاء القائمة!',
     'onboarding.doneDesc': 'تمت إضافة {categories} فئات و{products} منتجًا إلى قاعدة بياناتك بنجاح.',
     'onboarding.viewEstablishment': 'عرض منشأتي',
+    'onboarding.goToDashboard': 'الذهاب إلى لوحة التحكم',
+    'onboarding.previewMenu': 'معاينة قائمة العملاء',
     'onboarding.generate': 'أنشئ تطبيقي',
     'manager.title': 'مدير الذكاء الاصطناعي',
     'manager.greeting': 'مرحبًا! ماذا تريد أن تفعل؟ (مثال: "أضف بيتزا 4 أجبان بسعر 6000 فرنك")',
@@ -441,6 +449,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.doneTitle': 'Menu Gerado!',
     'onboarding.doneDesc': '{categories} categorias e {products} produtos foram adicionados à sua base de dados com sucesso.',
     'onboarding.viewEstablishment': 'Ver o meu estabelecimento',
+    'onboarding.goToDashboard': 'Ir para o painel',
+    'onboarding.previewMenu': 'Ver o menu do cliente',
     'onboarding.generate': 'Gerar a minha aplicação',
     'manager.title': 'Gestor IA',
     'manager.greeting': 'Olá! O que deseja fazer? (ex: "Adiciona a Pizza 4 Queijos por 6000 FCFA")',
@@ -532,6 +542,8 @@ export const translations: Record<Language, Dictionary> = {
     'onboarding.doneTitle': '菜单已生成！',
     'onboarding.doneDesc': '已成功将 {categories} 个类别和 {products} 个产品添加到您的数据库。',
     'onboarding.viewEstablishment': '查看我的店铺',
+    'onboarding.goToDashboard': '前往管理面板',
+    'onboarding.previewMenu': '预览顾客菜单',
     'onboarding.generate': '生成我的应用',
     'manager.title': 'AI 经理',
     'manager.greeting': '您好！您想做什么？（例如："添加四芝士披萨，售价 6000 FCFA"）',
