@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Send, Bot, Package, LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
+import { QRCodeModal } from '../components/QRCodeModal';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { OrdersList } from '../components/OrdersList';
+import { MenuEditor } from '../components/MenuEditor';
 import { useAuth } from '../lib/AuthContext';
 import { fetchEstablishmentBySlug, countPendingOrders, sendManagerQuery, subscribeToOrders } from '../lib/managerApi';
 import type { TranslationKey } from '../i18n/translations';
 
-type View = 'assistant' | 'orders';
+type View = 'assistant' | 'orders' | 'menu';
 
 // A chat message is either free text (the user's input) or a translation key
 // resolved at render time, so assistant messages follow the active language.
@@ -32,6 +34,7 @@ export function ManagerDashboard() {
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
   const [currency, setCurrency] = useState('FCFA');
   const [ordersRefreshKey, setOrdersRefreshKey] = useState(0);
+  const [showQR, setShowQR] = useState(false);
   // Demo mode shows a static placeholder; real mode loads the count below.
   const [pendingCount, setPendingCount] = useState<number | null>(isConfigured ? null : 4);
 
@@ -100,6 +103,14 @@ export function ManagerDashboard() {
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)' }}>
         <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>{t('manager.title')}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          <button
+            onClick={() => setShowQR(true)}
+            title="Show QR Code"
+            aria-label="Show QR Code"
+            style={{ width: 36, height: 36, borderRadius: 'var(--radius-full)', background: 'var(--bg-surface-elevated)', color: 'var(--text-secondary)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <QrCode size={18} />
+          </button>
           <LanguageSelect />
           {session && (
             <button
@@ -116,6 +127,10 @@ export function ManagerDashboard() {
           </div>
         </div>
       </header>
+
+      {showQR && slug && (
+        <QRCodeModal slug={slug} onClose={() => setShowQR(false)} />
+      )}
 
       {/* Main Content Area - Chat Interface */}
       <main style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
@@ -141,6 +156,12 @@ export function ManagerDashboard() {
             isConfigured={isConfigured}
             onChanged={refreshPending}
             refreshKey={ordersRefreshKey}
+          />
+        ) : view === 'menu' ? (
+          <MenuEditor
+            establishmentId={establishmentId}
+            currency={currency}
+            isConfigured={isConfigured}
           />
         ) : (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
@@ -206,10 +227,13 @@ export function ManagerDashboard() {
           <LayoutDashboard size={24} />
           <span style={{ fontSize: 10, fontWeight: 500 }}>{t('nav.orders')}</span>
         </button>
-        <div style={{ color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <button
+          onClick={() => setView('menu')}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: view === 'menu' ? 'var(--primary-accent)' : 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
+        >
           <Package size={24} />
           <span style={{ fontSize: 10, fontWeight: 500 }}>{t('nav.menu')}</span>
-        </div>
+        </button>
         <div style={{ color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
           <Settings size={24} />
           <span style={{ fontSize: 10, fontWeight: 500 }}>{t('nav.settings')}</span>

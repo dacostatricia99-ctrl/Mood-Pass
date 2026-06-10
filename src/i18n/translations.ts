@@ -23,7 +23,28 @@ export type TranslationKey =
   | 'category.drinks'
   | 'category.desserts'
   | 'menu.title'
+  | 'menu.demoNotice'
+  | 'menu.loading'
+  | 'menu.confirmDeleteCategory'
+  | 'menu.newCategory'
+  | 'menu.addCategory'
+  | 'menu.empty'
+  | 'menu.delete'
+  | 'menu.productName'
+  | 'menu.productPrice'
+  | 'menu.productDescription'
+  | 'menu.available'
+  | 'menu.unavailable'
+  | 'menu.edit'
+  | 'menu.addProduct'
+  | 'menu.save'
   | 'product.add'
+  | 'qr.title'
+  | 'qr.description'
+  | 'qr.generating'
+  | 'qr.download'
+  | 'qr.copy'
+  | 'qr.copied'
   // Cart
   | 'cart.title'
   | 'cart.empty'
@@ -103,7 +124,28 @@ export const translations: Record<Language, Dictionary> = {
     'category.drinks': 'Boissons',
     'category.desserts': 'Desserts',
     'menu.title': 'Notre Menu',
+    'menu.demoNotice': 'Le backend n\'est pas configuré — mode démo actif pour le menu.',
+    'menu.loading': 'Chargement du menu...',
+    'menu.confirmDeleteCategory': 'Voulez-vous vraiment supprimer cette catégorie ? Tous ses produits seront également supprimés.',
+    'menu.newCategory': 'Nouvelle catégorie',
+    'menu.addCategory': 'Ajouter catégorie',
+    'menu.empty': 'Aucune catégorie pour le moment.',
+    'menu.delete': 'Supprimer',
+    'menu.productName': 'Nom du produit',
+    'menu.productPrice': 'Prix',
+    'menu.productDescription': 'Description (optionnel)',
+    'menu.available': 'Disponible',
+    'menu.unavailable': 'Indisponible',
+    'menu.edit': 'Modifier',
+    'menu.addProduct': 'Ajouter un produit',
+    'menu.save': 'Enregistrer',
     'product.add': 'Ajouter +',
+    'qr.title': 'QR Code du Menu',
+    'qr.description': 'Scannez pour voir le menu et commander.',
+    'qr.generating': 'Génération...',
+    'qr.download': 'Télécharger l\'image',
+    'qr.copy': 'Copier le lien',
+    'qr.copied': 'Lien copié !',
     'cart.title': 'Mon Panier',
     'cart.empty': 'Votre panier est vide.',
     'cart.total': 'Total',
@@ -173,7 +215,28 @@ export const translations: Record<Language, Dictionary> = {
     'category.drinks': 'Drinks',
     'category.desserts': 'Desserts',
     'menu.title': 'Our Menu',
+    'menu.demoNotice': 'Backend is not configured — demo mode active for menu.',
+    'menu.loading': 'Loading menu...',
+    'menu.confirmDeleteCategory': 'Are you sure you want to delete this category? All its products will also be deleted.',
+    'menu.newCategory': 'New category',
+    'menu.addCategory': 'Add category',
+    'menu.empty': 'No categories yet.',
+    'menu.delete': 'Delete',
+    'menu.productName': 'Product name',
+    'menu.productPrice': 'Price',
+    'menu.productDescription': 'Description (optional)',
+    'menu.available': 'Available',
+    'menu.unavailable': 'Unavailable',
+    'menu.edit': 'Edit',
+    'menu.addProduct': 'Add a product',
+    'menu.save': 'Save',
     'product.add': 'Add +',
+    'qr.title': 'Menu QR Code',
+    'qr.description': 'Scan to view the menu and place orders.',
+    'qr.generating': 'Generating...',
+    'qr.download': 'Download Image',
+    'qr.copy': 'Copy Link',
+    'qr.copied': 'Link Copied!',
     'cart.title': 'My Cart',
     'cart.empty': 'Your cart is empty.',
     'cart.total': 'Total',
@@ -243,7 +306,28 @@ export const translations: Record<Language, Dictionary> = {
     'category.drinks': 'مشروبات',
     'category.desserts': 'حلويات',
     'menu.title': 'قائمتنا',
+    'menu.demoNotice': 'لم يتم تكوين الخادم — الوضع التجريبي مفعّل للقائمة.',
+    'menu.loading': 'جارٍ تحميل القائمة...',
+    'menu.confirmDeleteCategory': 'هل أنت متأكد من حذف هذه الفئة؟ سيتم حذف جميع منتجاتها.',
+    'menu.newCategory': 'فئة جديدة',
+    'menu.addCategory': 'إضافة فئة',
+    'menu.empty': 'لا توجد فئات حتى الآن.',
+    'menu.delete': 'حذف',
+    'menu.productName': 'اسم المنتج',
+    'menu.productPrice': 'السعر',
+    'menu.productDescription': 'الوصف (اختياري)',
+    'menu.available': 'متاح',
+    'menu.unavailable': 'غير متاح',
+    'menu.edit': 'تعديل',
+    'menu.addProduct': 'إضافة منتج',
+    'menu.save': 'حفظ',
     'product.add': 'أضف +',
+    'qr.title': 'رمز QR للقائمة',
+    'qr.description': 'امسح الرمز لعرض القائمة وطلب الطعام.',
+    'qr.generating': 'جارٍ الإنشاء...',
+    'qr.download': 'تنزيل الصورة',
+    'qr.copy': 'نسخ الرابط',
+    'qr.copied': 'تم نسخ الرابط!',
     'cart.title': 'سلتي',
     'cart.empty': 'سلتك فارغة.',
     'cart.total': 'المجموع',
@@ -313,7 +397,28 @@ export const translations: Record<Language, Dictionary> = {
     'category.drinks': 'Bebidas',
     'category.desserts': 'Sobremesas',
     'menu.title': 'O Nosso Menu',
+    'menu.demoNotice': 'O backend não está configurado — modo de demonstração ativo para o menu.',
+    'menu.loading': 'A carregar o menu...',
+    'menu.confirmDeleteCategory': 'Tem a certeza que deseja eliminar esta categoria? Todos os seus produtos também serão eliminados.',
+    'menu.newCategory': 'Nova categoria',
+    'menu.addCategory': 'Adicionar categoria',
+    'menu.empty': 'Ainda não há categorias.',
+    'menu.delete': 'Eliminar',
+    'menu.productName': 'Nome do produto',
+    'menu.productPrice': 'Preço',
+    'menu.productDescription': 'Descrição (opcional)',
+    'menu.available': 'Disponível',
+    'menu.unavailable': 'Indisponível',
+    'menu.edit': 'Editar',
+    'menu.addProduct': 'Adicionar produto',
+    'menu.save': 'Guardar',
     'product.add': 'Adicionar +',
+    'qr.title': 'Código QR do Menu',
+    'qr.description': 'Leia o código para ver o menu e fazer pedidos.',
+    'qr.generating': 'A gerar...',
+    'qr.download': 'Transferir imagem',
+    'qr.copy': 'Copiar link',
+    'qr.copied': 'Link copiado!',
     'cart.title': 'O Meu Carrinho',
     'cart.empty': 'O seu carrinho está vazio.',
     'cart.total': 'Total',
@@ -383,7 +488,28 @@ export const translations: Record<Language, Dictionary> = {
     'category.drinks': '饮料',
     'category.desserts': '甜点',
     'menu.title': '我们的菜单',
+    'menu.demoNotice': '后端未配置 — 菜单演示模式已启用。',
+    'menu.loading': '正在加载菜单...',
+    'menu.confirmDeleteCategory': '您确定要删除此类别吗？其所有产品也将被删除。',
+    'menu.newCategory': '新类别',
+    'menu.addCategory': '添加类别',
+    'menu.empty': '暂无类别。',
+    'menu.delete': '删除',
+    'menu.productName': '产品名称',
+    'menu.productPrice': '价格',
+    'menu.productDescription': '描述（可选）',
+    'menu.available': '可提供',
+    'menu.unavailable': '不可提供',
+    'menu.edit': '编辑',
+    'menu.addProduct': '添加产品',
+    'menu.save': '保存',
     'product.add': '添加 +',
+    'qr.title': '菜单二维码',
+    'qr.description': '扫描以查看菜单并下单。',
+    'qr.generating': '正在生成...',
+    'qr.download': '下载图片',
+    'qr.copy': '复制链接',
+    'qr.copied': '链接已复制！',
     'cart.title': '我的购物车',
     'cart.empty': '您的购物车是空的。',
     'cart.total': '合计',

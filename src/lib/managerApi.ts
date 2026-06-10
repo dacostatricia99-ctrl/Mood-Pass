@@ -1,4 +1,4 @@
-import type { LocalizedField } from '../types';
+import type { Category, LocalizedField, Product } from '../types';
 import { supabase } from './supabase';
 
 export type OrderStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
@@ -118,6 +118,112 @@ export function subscribeToOrders(establishmentId: string, onChange: () => void)
   return () => {
     client.removeChannel(channel);
   };
+}
+
+export interface MenuData {
+  categories: Category[];
+  products: Product[];
+}
+
+/** Loads the full menu (categories + products, available or not) for editing. */
+export async function fetchMenu(establishmentId: string): Promise<MenuData> {
+  if (!supabase) return { categories: [], products: [] };
+  const [cats, prods] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('id, establishment_id, name, name_i18n, display_order')
+      .eq('establishment_id', establishmentId)
+      .order('display_order', { ascending: true }),
+    supabase
+      .from('products')
+      .select('id, establishment_id, category_id, name, description, name_i18n, description_i18n, price, image_url, is_available')
+      .eq('establishment_id', establishmentId)
+      .order('created_at', { ascending: true }),
+  ]);
+  return {
+    categories: (cats.data as Category[]) ?? [],
+    products: (prods.data as Product[]) ?? [],
+  };
+}
+
+/** Creates a category at the end of the list. Returns the new row. */
+export async function createCategory(establishmentId: string, name: string, displayOrder: number): Promise<Category> {
+  if (!supabase) throw new Error('Supabase is not configured');
+  const { data, error } = await supabase
+    .from('categories')
+    .insert({ establishment_id: establishmentId, name: name.trim(), display_order: displayOrder })
+    .select('id, establishment_id, name, name_i18n, display_order')
+    .single();
+  if (error) throw error;
+  return data as Category;
+}
+
+/** Renames a category. */
+export async function updateCategory(categoryId: string, name: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from('categories').update({ name: name.trim() }).eq('id', categoryId);
+  if (error) throw error;
+}
+
+/** Deletes a category (and its products, via ON DELETE CASCADE). */
+export async function deleteCategory(categoryId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from('categories').delete().eq('id', categoryId);
+  if (error) throw error;
+}
+
+export interface ProductInput {
+  establishmentId: string;
+  categoryId: string;
+  name: string;
+  description?: string;
+  price: number;
+}
+
+/** Creates a product. i18n maps are left empty — the UI falls back to canonical text. */
+export async function createProduct(input: ProductInput): Promise<Product> {
+  if (!supabase) throw new Error('Supabase is not configured');
+  const { data, error } = await supabase
+    .from('products')
+    .insert({
+      establishment_id: input.establishmentId,
+      category_id: input.categoryId,
+      name: input.name.trim(),
+      description: input.description?.trim() || null,
+      price: input.price,
+    })
+    .select('id, establishment_id, category_id, name, description, name_i18n, description_i18n, price, image_url, is_available')
+    .single();
+  if (error) throw error;
+  return data as Product;
+}
+
+/** Updates editable product fields (name, description, price). */
+export async function updateProduct(
+  productId: string,
+  patch: { name?: string; description?: string | null; price?: number },
+): Promise<void> {
+  if (!supabase) return;
+  const clean: Record<string, unknown> = {};
+  if (patch.name !== undefined) clean.name = patch.name.trim();
+  if (patch.description !== undefined) clean.description = patch.description?.toString().trim() || null;
+  if (patch.price !== undefined) clean.price = patch.price;
+  const { error } = await supabase.from('products').update(clean).eq('id', productId);
+  if (error) throw error;
+}
+
+/** Toggles whether a product is shown to customers. */
+export async function setProductAvailability(productId: string, isAvailable: boolean): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from('products').update({ is_available: isAvailable }).eq('id', productId);
+  if (error) throw error;
+}
+
+/** Deletes a product. */
+export async function deleteProduct(productId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from('products').delete().eq('id', productId);
+  if (error) throw error;
 }
 
 /**

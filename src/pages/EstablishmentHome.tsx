@@ -76,7 +76,7 @@ export function EstablishmentHome() {
       <header className="app-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-card)' }}>
-            <img src="https://api.dicebear.com/7.x/initials/svg?seed=MP&backgroundColor=ef4444" alt="Logo" style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-md)' }} />
+            <img src="https://api.dicebear.com/7.x/initials/svg?seed=MP&backgroundColor=ef4444" alt="Logo" loading="lazy" decoding="async" width={40} height={40} style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-md)' }} />
           </div>
           <h1 style={{ lineHeight: 1.1 }}>
             {establishmentName}
@@ -110,11 +110,15 @@ export function EstablishmentHome() {
         <div style={{ margin: 'var(--space-md) 0' }}>
           <div className="scroll-container">
             {carouselImages.map((src, idx) => (
-              <div key={idx} className="scroll-item" style={{ width: '85%', height: '160px', position: 'relative' }}>
-                <img 
-                  src={src} 
-                  alt="Delicious food" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              <div key={idx} className="scroll-item" style={{ width: '85%', height: '160px', position: 'relative', background: 'var(--bg-surface)' }}>
+                <img
+                  src={src}
+                  alt="Delicious food"
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  width={600}
+                  height={300}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
                 <div style={{ position: 'absolute', bottom: 'var(--space-sm)', left: 'var(--space-md)', color: 'white', fontWeight: 'bold', fontSize: 'var(--font-lg)' }}>
