@@ -89,6 +89,15 @@ export type TranslationKey =
   | 'kitchen.new'
   | 'kitchen.start'
   | 'kitchen.markReady'
+  | 'stats.title'
+  | 'stats.revenueToday'
+  | 'stats.ordersToday'
+  | 'stats.avgBasket'
+  | 'stats.totalRevenue'
+  | 'stats.last7days'
+  | 'stats.topProducts'
+  | 'stats.sold'
+  | 'stats.empty'
   | 'manager.actionDone'
   | 'manager.pendingOrders'
   | 'manager.viewAll'
@@ -199,6 +208,15 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'Nouvelle',
     'kitchen.start': 'Commencer',
     'kitchen.markReady': 'Marquer prête',
+    'stats.title': 'Statistiques',
+    'stats.revenueToday': 'CA du jour',
+    'stats.ordersToday': 'Commandes du jour',
+    'stats.avgBasket': 'Panier moyen',
+    'stats.totalRevenue': 'CA total',
+    'stats.last7days': '7 derniers jours',
+    'stats.topProducts': 'Produits populaires',
+    'stats.sold': 'vendus',
+    'stats.empty': 'Pas encore de données de vente',
     'manager.actionDone': 'Action exécutée avec succès ! J\'ai bien compris votre demande : "{query}".',
     'manager.pendingOrders': 'Commandes en attente',
     'manager.viewAll': 'Voir tout',
@@ -304,6 +322,15 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'New',
     'kitchen.start': 'Start',
     'kitchen.markReady': 'Mark ready',
+    'stats.title': 'Statistics',
+    'stats.revenueToday': 'Revenue today',
+    'stats.ordersToday': 'Orders today',
+    'stats.avgBasket': 'Average basket',
+    'stats.totalRevenue': 'Total revenue',
+    'stats.last7days': 'Last 7 days',
+    'stats.topProducts': 'Top products',
+    'stats.sold': 'sold',
+    'stats.empty': 'No sales data yet',
     'manager.actionDone': 'Action completed successfully! I understood your request: "{query}".',
     'manager.pendingOrders': 'Pending orders',
     'manager.viewAll': 'View all',
@@ -409,6 +436,15 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'جديد',
     'kitchen.start': 'ابدأ',
     'kitchen.markReady': 'جاهز',
+    'stats.title': 'الإحصائيات',
+    'stats.revenueToday': 'إيرادات اليوم',
+    'stats.ordersToday': 'طلبات اليوم',
+    'stats.avgBasket': 'متوسط السلة',
+    'stats.totalRevenue': 'إجمالي الإيرادات',
+    'stats.last7days': 'آخر 7 أيام',
+    'stats.topProducts': 'المنتجات الأكثر مبيعًا',
+    'stats.sold': 'مبيع',
+    'stats.empty': 'لا توجد بيانات مبيعات بعد',
     'manager.actionDone': 'تم تنفيذ الإجراء بنجاح! لقد فهمت طلبك: "{query}".',
     'manager.pendingOrders': 'الطلبات المعلقة',
     'manager.viewAll': 'عرض الكل',
@@ -514,6 +550,15 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'Novo',
     'kitchen.start': 'Começar',
     'kitchen.markReady': 'Marcar pronto',
+    'stats.title': 'Estatísticas',
+    'stats.revenueToday': 'Receita de hoje',
+    'stats.ordersToday': 'Pedidos de hoje',
+    'stats.avgBasket': 'Cesto médio',
+    'stats.totalRevenue': 'Receita total',
+    'stats.last7days': 'Últimos 7 dias',
+    'stats.topProducts': 'Produtos populares',
+    'stats.sold': 'vendidos',
+    'stats.empty': 'Ainda sem dados de vendas',
     'manager.actionDone': 'Ação executada com sucesso! Compreendi o seu pedido: "{query}".',
     'manager.pendingOrders': 'Pedidos pendentes',
     'manager.viewAll': 'Ver tudo',
@@ -619,6 +664,15 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': '新订单',
     'kitchen.start': '开始制作',
     'kitchen.markReady': '标记为就绪',
+    'stats.title': '统计',
+    'stats.revenueToday': '今日营收',
+    'stats.ordersToday': '今日订单',
+    'stats.avgBasket': '平均客单价',
+    'stats.totalRevenue': '总营收',
+    'stats.last7days': '最近 7 天',
+    'stats.topProducts': '热销产品',
+    'stats.sold': '已售',
+    'stats.empty': '暂无销售数据',
     'manager.actionDone': '操作已成功执行！我已理解您的请求："{query}"。',
     'manager.pendingOrders': '待处理订单',
     'manager.viewAll': '查看全部',
