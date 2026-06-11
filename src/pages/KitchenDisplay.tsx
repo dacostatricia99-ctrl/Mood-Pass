@@ -16,8 +16,8 @@ import {
 import { playOrderChime, requestNotificationPermission, showOrderNotification } from '../lib/notifications';
 
 const DEMO_ORDERS: OrderView[] = [
-  { id: 'k1', reference: '#A1B2C3', tableNumber: '4', total: 0, status: 'pending', createdAt: new Date(Date.now() - 2 * 60000).toISOString(), items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Frites' }] },
-  { id: 'k2', reference: '#D4E5F6', tableNumber: '7', total: 0, status: 'accepted', createdAt: new Date(Date.now() - 6 * 60000).toISOString(), items: [{ quantity: 1, name: 'Pizza Diabola' }] },
+  { id: 'k1', reference: '#A1B2C3', tableNumber: '4', total: 0, status: 'pending', paymentMethod: 'cash', paymentStatus: 'unpaid', createdAt: new Date(Date.now() - 2 * 60000).toISOString(), items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Frites' }] },
+  { id: 'k2', reference: '#D4E5F6', tableNumber: '7', total: 0, status: 'accepted', paymentMethod: 'mobile_money', paymentStatus: 'paid', createdAt: new Date(Date.now() - 6 * 60000).toISOString(), items: [{ quantity: 1, name: 'Pizza Diabola' }] },
 ];
 
 function timeHHMM(iso: string): string {

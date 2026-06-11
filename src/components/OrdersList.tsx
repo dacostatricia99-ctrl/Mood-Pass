@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Check, X, CheckCheck } from 'lucide-react';
+import { Check, X, CheckCheck, Wallet, Smartphone } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeText } from '../i18n/menuData';
 import { formatPrice } from '../lib/format';
-import { fetchOrders, updateOrderStatus, type OrderStatus, type OrderView } from '../lib/managerApi';
+import { fetchOrders, updateOrderStatus, setOrderPaid, type OrderStatus, type OrderView } from '../lib/managerApi';
 
 const DEMO_ORDERS: OrderView[] = [
   {
     id: 'demo-1', reference: '#A1B2C3', tableNumber: '4', total: 15000, status: 'pending',
-    createdAt: new Date().toISOString(),
+    paymentMethod: 'cash', paymentStatus: 'unpaid', createdAt: new Date().toISOString(),
     items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Pizza Diabola' }],
   },
   {
     id: 'demo-2', reference: '#D4E5F6', tableNumber: '7', total: 3000, status: 'accepted',
-    createdAt: new Date().toISOString(),
+    paymentMethod: 'mobile_money', paymentStatus: 'paid', createdAt: new Date().toISOString(),
     items: [{ quantity: 1, name: 'Cocktail Sunrise' }],
   },
 ];
@@ -69,6 +69,17 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
     onChanged?.();
   };
 
+  const markPaid = async (id: string) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, paymentStatus: 'paid' } : o)));
+    if (isConfigured) {
+      try {
+        await setOrderPaid(id);
+      } catch {
+        if (establishmentId) setOrders(await fetchOrders(establishmentId));
+      }
+    }
+  };
+
   if (orders.length === 0) {
     return (
       <div style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: 'var(--space-2xl)' }}>
@@ -112,7 +123,22 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontWeight: 'bold', color: 'var(--primary-accent)' }}>{formatPrice(order.total, currency)}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--font-xs)', fontWeight: 600, color: order.paymentStatus === 'paid' ? '#16a34a' : 'var(--text-secondary)' }}>
+              {order.paymentMethod === 'mobile_money' ? <Smartphone size={13} /> : <Wallet size={13} />}
+              {order.paymentMethod === 'mobile_money' ? t('checkout.mobileMoney') : t('checkout.cash')}
+              {' · '}
+              {order.paymentStatus === 'paid' ? t('orders.paid') : t('orders.unpaid')}
+            </span>
           </div>
+
+          {order.paymentStatus !== 'paid' && order.status !== 'cancelled' && (
+            <button
+              onClick={() => markPaid(order.id)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-glass)', background: 'transparent', color: '#16a34a', fontWeight: 600, fontSize: 'var(--font-sm)', cursor: 'pointer' }}
+            >
+              <Wallet size={14} /> {t('orders.markPaid')}
+            </button>
+          )}
 
           {(order.status === 'pending' || order.status === 'accepted') && (
             <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-xs)' }}>

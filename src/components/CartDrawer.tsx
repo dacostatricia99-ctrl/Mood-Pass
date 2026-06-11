@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useCartStore } from '../store/cartStore';
-import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle, Wallet, Smartphone } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
-import { createOrder, fetchOrderStatus, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
+import { createOrder, fetchOrderStatus, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
 import { formatPrice } from '../lib/format';
 
 type Status = 'idle' | 'placing' | 'error' | 'success';
 
 interface CartDrawerProps {
   currency: string;
+  mobileMoneyEnabled: boolean;
 }
 
-export function CartDrawer({ currency }: CartDrawerProps) {
+export function CartDrawer({ currency, mobileMoneyEnabled }: CartDrawerProps) {
   const { items, isDrawerOpen, toggleDrawer, updateQuantity, getCartTotal, clearCart } = useCartStore();
   const { language, t } = useTranslation();
 
   const [tableNumber, setTableNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [status, setStatus] = useState<Status>('idle');
   const [reference, setReference] = useState('');
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
@@ -45,6 +47,7 @@ export function CartDrawer({ currency }: CartDrawerProps) {
     setStatus('idle');
     setReference('');
     setTableNumber('');
+    setPaymentMethod('cash');
     setPlacedOrder(null);
     setTrackStatus('pending');
     toggleDrawer();
@@ -59,6 +62,7 @@ export function CartDrawer({ currency }: CartDrawerProps) {
         items,
         total: getCartTotal(),
         tableNumber,
+        paymentMethod,
       });
       setReference(order.reference);
       setPlacedOrder(order);
@@ -224,6 +228,35 @@ export function CartDrawer({ currency }: CartDrawerProps) {
                   placeholder={t('cart.tableNumber')}
                   style={{ width: '100%', boxSizing: 'border-box', marginBottom: 'var(--space-md)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: 'var(--border-glass)', background: 'var(--bg-surface)', color: 'var(--text-primary)', outline: 'none' }}
                 />
+
+                {/* Payment method */}
+                <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)' }}>{t('checkout.payMethod')}</div>
+                <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+                  {([
+                    { key: 'cash' as const, label: t('checkout.cash'), Icon: Wallet, enabled: true },
+                    { key: 'mobile_money' as const, label: t('checkout.mobileMoney'), Icon: Smartphone, enabled: mobileMoneyEnabled },
+                  ]).map(({ key, label, Icon, enabled }) => {
+                    const selected = paymentMethod === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => enabled && setPaymentMethod(key)}
+                        disabled={!enabled}
+                        title={!enabled ? t('checkout.mobileMoneyOff') : label}
+                        style={{
+                          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px',
+                          borderRadius: 'var(--radius-sm)', cursor: enabled ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 'var(--font-sm)',
+                          border: selected ? '2px solid var(--primary-accent)' : '1px solid var(--border-glass)',
+                          background: selected ? 'rgba(107, 76, 255, 0.12)' : 'var(--bg-surface)',
+                          color: enabled ? 'var(--text-primary)' : 'var(--text-secondary)', opacity: enabled ? 1 : 0.5,
+                        }}
+                      >
+                        <Icon size={16} /> {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-md)', fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>
                   <span>{t('cart.total')}</span>
                   <span>{formatPrice(getCartTotal(), currency)}</span>

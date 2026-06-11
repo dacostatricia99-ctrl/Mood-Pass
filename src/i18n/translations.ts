@@ -63,6 +63,13 @@ export type TranslationKey =
   | 'order.track.preparing'
   | 'order.track.ready'
   | 'order.track.cancelled'
+  | 'checkout.payMethod'
+  | 'checkout.cash'
+  | 'checkout.mobileMoney'
+  | 'checkout.mobileMoneyOff'
+  | 'orders.paid'
+  | 'orders.unpaid'
+  | 'orders.markPaid'
   // App fallback
   | 'home.scanPrompt'
   // Onboarding
@@ -187,6 +194,13 @@ export const translations: Record<Language, Dictionary> = {
     'order.track.preparing': 'En préparation',
     'order.track.ready': 'Prête',
     'order.track.cancelled': 'Commande annulée',
+    'checkout.payMethod': 'Mode de paiement',
+    'checkout.cash': 'Espèces',
+    'checkout.mobileMoney': 'Mobile Money',
+    'checkout.mobileMoneyOff': 'Le restaurant n\'a pas activé le paiement mobile',
+    'orders.paid': 'Payé',
+    'orders.unpaid': 'Non payé',
+    'orders.markPaid': 'Marquer payé',
     'home.scanPrompt': "Veuillez scanner le QR Code d'un établissement pour accéder à son menu.",
     'onboarding.title': 'Créer votre Menu',
     'onboarding.subtitle': "Laissez l'IA faire le travail. Prenez votre menu en photo, nous nous occupons du reste.",
@@ -303,6 +317,13 @@ export const translations: Record<Language, Dictionary> = {
     'order.track.preparing': 'Preparing',
     'order.track.ready': 'Ready',
     'order.track.cancelled': 'Order cancelled',
+    'checkout.payMethod': 'Payment method',
+    'checkout.cash': 'Cash',
+    'checkout.mobileMoney': 'Mobile Money',
+    'checkout.mobileMoneyOff': 'This restaurant has not enabled mobile payment',
+    'orders.paid': 'Paid',
+    'orders.unpaid': 'Unpaid',
+    'orders.markPaid': 'Mark paid',
     'home.scanPrompt': "Please scan an establishment's QR code to access its menu.",
     'onboarding.title': 'Create your Menu',
     'onboarding.subtitle': 'Let AI do the work. Take a photo of your menu and we handle the rest.',
@@ -419,6 +440,13 @@ export const translations: Record<Language, Dictionary> = {
     'order.track.preparing': 'قيد التحضير',
     'order.track.ready': 'جاهز',
     'order.track.cancelled': 'تم إلغاء الطلب',
+    'checkout.payMethod': 'طريقة الدفع',
+    'checkout.cash': 'نقدًا',
+    'checkout.mobileMoney': 'الدفع عبر الهاتف',
+    'checkout.mobileMoneyOff': 'لم يُفعّل المطعم الدفع عبر الهاتف',
+    'orders.paid': 'مدفوع',
+    'orders.unpaid': 'غير مدفوع',
+    'orders.markPaid': 'تحديد كمدفوع',
     'home.scanPrompt': 'يرجى مسح رمز QR الخاص بالمنشأة للوصول إلى قائمتها.',
     'onboarding.title': 'أنشئ قائمتك',
     'onboarding.subtitle': 'دع الذكاء الاصطناعي يقوم بالعمل. التقط صورة لقائمتك وسنتولى الباقي.',
@@ -535,6 +563,13 @@ export const translations: Record<Language, Dictionary> = {
     'order.track.preparing': 'Em preparação',
     'order.track.ready': 'Pronto',
     'order.track.cancelled': 'Pedido cancelado',
+    'checkout.payMethod': 'Forma de pagamento',
+    'checkout.cash': 'Dinheiro',
+    'checkout.mobileMoney': 'Mobile Money',
+    'checkout.mobileMoneyOff': 'Este restaurante não ativou o pagamento móvel',
+    'orders.paid': 'Pago',
+    'orders.unpaid': 'Não pago',
+    'orders.markPaid': 'Marcar como pago',
     'home.scanPrompt': 'Leia o código QR de um estabelecimento para aceder ao seu menu.',
     'onboarding.title': 'Criar o seu Menu',
     'onboarding.subtitle': 'Deixe a IA fazer o trabalho. Tire uma foto do seu menu e nós tratamos do resto.',
@@ -651,6 +686,13 @@ export const translations: Record<Language, Dictionary> = {
     'order.track.preparing': '制作中',
     'order.track.ready': '已就绪',
     'order.track.cancelled': '订单已取消',
+    'checkout.payMethod': '支付方式',
+    'checkout.cash': '现金',
+    'checkout.mobileMoney': '移动支付',
+    'checkout.mobileMoneyOff': '该餐厅未启用移动支付',
+    'orders.paid': '已支付',
+    'orders.unpaid': '未支付',
+    'orders.markPaid': '标记为已支付',
     'home.scanPrompt': '请扫描商家的二维码以查看其菜单。',
     'onboarding.title': '创建您的菜单',
     'onboarding.subtitle': '让 AI 来完成工作。拍下您的菜单照片，其余的交给我们。',

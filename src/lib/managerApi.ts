@@ -2,6 +2,8 @@ import type { Category, LocalizedField, Product } from '../types';
 import { supabase } from './supabase';
 
 export type OrderStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
+export type PaymentMethod = 'cash' | 'mobile_money';
+export type PaymentStatus = 'unpaid' | 'pending' | 'paid';
 
 export interface OrderItemView {
   quantity: number;
@@ -15,6 +17,8 @@ export interface OrderView {
   tableNumber: string | null;
   total: number;
   status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
   createdAt: string;
   items: OrderItemView[];
 }
@@ -57,6 +61,8 @@ interface OrderRow {
   table_number: string | null;
   total_amount: number;
   status: OrderStatus;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
   created_at: string;
   order_items: {
     quantity: number;
@@ -69,7 +75,7 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
   if (!supabase) return [];
   const { data, error } = await supabase
     .from('orders')
-    .select('id, table_number, total_amount, status, created_at, order_items(quantity, products(name, name_i18n))')
+    .select('id, table_number, total_amount, status, payment_method, payment_status, created_at, order_items(quantity, products(name, name_i18n))')
     .eq('establishment_id', establishmentId)
     .order('created_at', { ascending: false });
 
@@ -81,6 +87,8 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
     tableNumber: row.table_number,
     total: row.total_amount,
     status: row.status,
+    paymentMethod: row.payment_method ?? 'cash',
+    paymentStatus: row.payment_status ?? 'unpaid',
     createdAt: row.created_at,
     items: (row.order_items ?? []).map((item) => {
       const product = Array.isArray(item.products) ? item.products[0] : item.products;
@@ -97,6 +105,13 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
+  if (error) throw error;
+}
+
+/** Marks an order as paid — used by the manager to confirm a cash payment. */
+export async function setOrderPaid(orderId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from('orders').update({ payment_status: 'paid' }).eq('id', orderId);
   if (error) throw error;
 }
 

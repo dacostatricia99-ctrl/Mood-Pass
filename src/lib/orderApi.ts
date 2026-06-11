@@ -42,13 +42,16 @@ function randomId(): string {
  * (i.e. not the demo data). Otherwise returns a local-only confirmation so the
  * checkout flow still works on the bundled demo menu.
  */
+export type PaymentMethod = 'cash' | 'mobile_money';
+
 export async function createOrder(params: {
   establishmentId: string;
   items: CartItem[];
   total: number;
   tableNumber?: string;
+  paymentMethod?: PaymentMethod;
 }): Promise<PlacedOrder> {
-  const { establishmentId, items, total, tableNumber } = params;
+  const { establishmentId, items, total, tableNumber, paymentMethod = 'cash' } = params;
 
   if (!supabase || !UUID_RE.test(establishmentId)) {
     const id = randomId();
@@ -66,6 +69,10 @@ export async function createOrder(params: {
       establishment_id: establishmentId,
       table_number: tableNumber?.trim() || null,
       total_amount: total,
+      payment_method: paymentMethod,
+      // Cash is settled in person (unpaid until the manager confirms); mobile
+      // money starts pending until the payment provider confirms it.
+      payment_status: paymentMethod === 'cash' ? 'unpaid' : 'pending',
     });
 
   if (orderError) throw orderError;

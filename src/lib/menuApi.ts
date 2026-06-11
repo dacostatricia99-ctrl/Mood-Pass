@@ -6,6 +6,7 @@ export interface EstablishmentMenu {
   categories: Category[];
   products: Product[];
   currency: string;
+  mobileMoneyEnabled: boolean;
   source: 'remote' | 'mock';
 }
 
@@ -13,6 +14,7 @@ const MOCK_MENU: EstablishmentMenu = {
   categories: mockCategories,
   products: mockProducts,
   currency: 'FCFA',
+  mobileMoneyEnabled: false,
   source: 'mock',
 };
 
@@ -31,7 +33,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
   // 1. Resolve the establishment from its slug.
   const { data: establishment, error: estError } = await supabase
     .from('establishments')
-    .select('id, currency')
+    .select('id, currency, mobile_money_enabled')
     .eq('slug', slug)
     .maybeSingle();
 
@@ -63,6 +65,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
     categories: (categoriesResult.data as Category[]) ?? [],
     products: products as Product[],
     currency: (establishment.currency as string) ?? 'FCFA',
+    mobileMoneyEnabled: Boolean((establishment as { mobile_money_enabled?: boolean }).mobile_money_enabled),
     source: 'remote',
   };
 }

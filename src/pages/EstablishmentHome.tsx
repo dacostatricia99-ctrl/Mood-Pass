@@ -30,17 +30,19 @@ export function EstablishmentHome() {
   const [rawProducts, setRawProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currency, setCurrency] = useState('FCFA');
+  const [mobileMoneyEnabled, setMobileMoneyEnabled] = useState(false);
 
   const totalItems = getTotalItems();
   const establishmentName = slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'MoodPass';
 
   useEffect(() => {
     let active = true;
-    fetchEstablishmentMenu(slug).then(({ products, categories, currency }) => {
+    fetchEstablishmentMenu(slug).then(({ products, categories, currency, mobileMoneyEnabled }) => {
       if (!active) return;
       setRawProducts(products);
       setCategories(categories);
       setCurrency(currency);
+      setMobileMoneyEnabled(mobileMoneyEnabled);
       setActiveCategory(ALL_CATEGORY);
     });
     return () => {
@@ -166,7 +168,7 @@ export function EstablishmentHome() {
       </main>
 
       {/* Overlays */}
-      <CartDrawer currency={currency} />
+      <CartDrawer currency={currency} mobileMoneyEnabled={mobileMoneyEnabled} />
     </div>
   );
 }
