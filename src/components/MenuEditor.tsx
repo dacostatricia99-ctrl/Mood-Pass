@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Trash2, Check, X, Pencil, Eye, EyeOff, Package } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Plus, Trash2, Check, X, Pencil, Eye, EyeOff, Package, ImagePlus, Loader2 } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { formatPrice } from '../lib/format';
 import type { Category, Product } from '../types';
@@ -11,6 +11,7 @@ import {
   updateProduct,
   setProductAvailability,
   deleteProduct,
+  uploadProductImage,
 } from '../lib/managerApi';
 
 interface MenuEditorProps {
@@ -40,6 +41,10 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
   // product being edited inline.
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<DraftProduct>(emptyDraft);
+  // product photo upload.
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingProductRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isConfigured || !establishmentId) {
@@ -121,6 +126,27 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const openImagePicker = (productId: string) => {
+    pendingProductRef.current = productId;
+    fileInputRef.current?.click();
+  };
+
+  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const productId = pendingProductRef.current;
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file || !productId || !establishmentId) return;
+    setUploadingId(productId);
+    try {
+      const url = await uploadProductImage(establishmentId, productId, file);
+      setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, image_url: url } : p)));
+    } catch {
+      /* upload failed — ignore, keep current image */
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const fieldStyle: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box', padding: '10px 14px', borderRadius: 'var(--radius-sm)',
     border: '1px solid var(--border-glass)', background: 'var(--bg-color)', color: 'var(--text-primary)', outline: 'none', fontSize: 'var(--font-sm)',
@@ -134,6 +160,10 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+      {/* Shared hidden file input for product photo uploads. */}
+      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleImageSelected} />
+      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+
       {/* Header section inside the menu editor */}
       <div className="glass-panel" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
         <h2 style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold', margin: 0, color: 'var(--text-primary)' }}>{t('nav.menu')}</h2>
@@ -193,15 +223,25 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
                     </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-sm)', opacity: p.is_available ? 1 : 0.6, transition: 'opacity 0.2s' }}>
-                      {p.image_url ? (
-                        <div style={{ width: 60, height: 60, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: '#eee' }}>
+                      <button
+                        onClick={() => openImagePicker(p.id)}
+                        title={t('menu.changePhoto')}
+                        disabled={uploadingId === p.id}
+                        style={{ position: 'relative', width: 60, height: 60, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, padding: 0, border: '1px solid var(--border-glass)', cursor: 'pointer', background: p.image_url ? '#eee' : 'rgba(0,0,0,0.05)' }}
+                      >
+                        {p.image_url ? (
                           <img src={p.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-                      ) : (
-                        <div style={{ width: 60, height: 60, borderRadius: 'var(--radius-sm)', flexShrink: 0, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
-                          <Package size={24} />
-                        </div>
-                      )}
+                        ) : (
+                          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: 'var(--text-secondary)' }}>
+                            <ImagePlus size={22} />
+                          </span>
+                        )}
+                        {uploadingId === p.id && (
+                          <span style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                            <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                          </span>
+                        )}
+                      </button>
                       
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

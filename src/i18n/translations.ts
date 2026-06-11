@@ -34,6 +34,7 @@ export type TranslationKey =
   | 'menu.productPrice'
   | 'menu.productDescription'
   | 'menu.available'
+  | 'menu.changePhoto'
   | 'menu.unavailable'
   | 'menu.edit'
   | 'menu.addProduct'
@@ -89,6 +90,7 @@ export type TranslationKey =
   | 'kitchen.new'
   | 'kitchen.start'
   | 'kitchen.markReady'
+  | 'kitchen.print'
   | 'stats.title'
   | 'stats.revenueToday'
   | 'stats.ordersToday'
@@ -158,6 +160,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.productPrice': 'Prix',
     'menu.productDescription': 'Description (optionnel)',
     'menu.available': 'Disponible',
+    'menu.changePhoto': 'Changer la photo',
     'menu.unavailable': 'Indisponible',
     'menu.edit': 'Modifier',
     'menu.addProduct': 'Ajouter un produit',
@@ -208,6 +211,7 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'Nouvelle',
     'kitchen.start': 'Commencer',
     'kitchen.markReady': 'Marquer prête',
+    'kitchen.print': 'Imprimer',
     'stats.title': 'Statistiques',
     'stats.revenueToday': 'CA du jour',
     'stats.ordersToday': 'Commandes du jour',
@@ -272,6 +276,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.productPrice': 'Price',
     'menu.productDescription': 'Description (optional)',
     'menu.available': 'Available',
+    'menu.changePhoto': 'Change photo',
     'menu.unavailable': 'Unavailable',
     'menu.edit': 'Edit',
     'menu.addProduct': 'Add a product',
@@ -322,6 +327,7 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'New',
     'kitchen.start': 'Start',
     'kitchen.markReady': 'Mark ready',
+    'kitchen.print': 'Print',
     'stats.title': 'Statistics',
     'stats.revenueToday': 'Revenue today',
     'stats.ordersToday': 'Orders today',
@@ -386,6 +392,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.productPrice': 'السعر',
     'menu.productDescription': 'الوصف (اختياري)',
     'menu.available': 'متاح',
+    'menu.changePhoto': 'تغيير الصورة',
     'menu.unavailable': 'غير متاح',
     'menu.edit': 'تعديل',
     'menu.addProduct': 'إضافة منتج',
@@ -436,6 +443,7 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'جديد',
     'kitchen.start': 'ابدأ',
     'kitchen.markReady': 'جاهز',
+    'kitchen.print': 'طباعة',
     'stats.title': 'الإحصائيات',
     'stats.revenueToday': 'إيرادات اليوم',
     'stats.ordersToday': 'طلبات اليوم',
@@ -500,6 +508,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.productPrice': 'Preço',
     'menu.productDescription': 'Descrição (opcional)',
     'menu.available': 'Disponível',
+    'menu.changePhoto': 'Mudar foto',
     'menu.unavailable': 'Indisponível',
     'menu.edit': 'Editar',
     'menu.addProduct': 'Adicionar produto',
@@ -550,6 +559,7 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': 'Novo',
     'kitchen.start': 'Começar',
     'kitchen.markReady': 'Marcar pronto',
+    'kitchen.print': 'Imprimir',
     'stats.title': 'Estatísticas',
     'stats.revenueToday': 'Receita de hoje',
     'stats.ordersToday': 'Pedidos de hoje',
@@ -614,6 +624,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.productPrice': '价格',
     'menu.productDescription': '描述（可选）',
     'menu.available': '可提供',
+    'menu.changePhoto': '更换照片',
     'menu.unavailable': '不可提供',
     'menu.edit': '编辑',
     'menu.addProduct': '添加产品',
@@ -664,6 +675,7 @@ export const translations: Record<Language, Dictionary> = {
     'kitchen.new': '新订单',
     'kitchen.start': '开始制作',
     'kitchen.markReady': '标记为就绪',
+    'kitchen.print': '打印',
     'stats.title': '统计',
     'stats.revenueToday': '今日营收',
     'stats.ordersToday': '今日订单',

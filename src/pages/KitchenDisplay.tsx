@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ChefHat, Check, CheckCheck, Clock } from 'lucide-react';
+import { ChefHat, Check, CheckCheck, Clock, Printer } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeText } from '../i18n/menuData';
 import { LanguageSelect } from '../components/LanguageSelect';
@@ -22,6 +22,10 @@ const DEMO_ORDERS: OrderView[] = [
 
 function timeHHMM(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
 }
 
 export function KitchenDisplay() {
@@ -78,6 +82,39 @@ export function KitchenDisplay() {
     }
   };
 
+  // Opens a thermal-printer-friendly (80mm) ticket in a popup and prints it.
+  const printTicket = (order: OrderView) => {
+    const w = window.open('', '_blank', 'width=320,height=600');
+    if (!w) return;
+    const heading = order.tableNumber ? `${t('orders.table')} ${order.tableNumber}` : order.reference;
+    const items = order.items
+      .map((it) => `<div class="item"><span class="qty">${it.quantity}×</span> ${escapeHtml(localizeText(it.nameI18n, language, it.name))}</div>`)
+      .join('');
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(order.reference)}</title><style>
+      @page { size: 80mm auto; margin: 0; }
+      * { box-sizing: border-box; }
+      body { width: 80mm; margin: 0; padding: 8px 10px; font-family: 'Courier New', monospace; color: #000; }
+      h1 { font-size: 18px; text-align: center; margin: 0 0 2px; letter-spacing: 1px; }
+      .sub { text-align: center; font-size: 12px; margin-bottom: 6px; }
+      .meta { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; }
+      hr { border: none; border-top: 1px dashed #000; margin: 6px 0; }
+      .item { font-size: 16px; margin: 6px 0; }
+      .qty { font-weight: bold; margin-right: 4px; }
+      .foot { text-align: center; font-size: 11px; margin-top: 8px; }
+    </style></head><body>
+      <h1>${escapeHtml(t('kitchen.title')).toUpperCase()}</h1>
+      <div class="sub">${escapeHtml(order.reference)}</div>
+      <hr>
+      <div class="meta"><span>${escapeHtml(heading)}</span><span>${timeHHMM(order.createdAt)}</span></div>
+      <hr>
+      ${items}
+      <hr>
+      <div class="foot">Mood Pass</div>
+      <script>window.onload = function(){ window.print(); }<\/script>
+    </body></html>`);
+    w.document.close();
+  };
+
   // Only orders the kitchen acts on, oldest first (FIFO).
   const active = orders
     .filter((o) => o.status === 'pending' || o.status === 'accepted')
@@ -109,9 +146,14 @@ export function KitchenDisplay() {
                   <div style={{ fontWeight: 'bold', fontSize: 'var(--font-md)' }}>
                     {order.tableNumber ? `${t('orders.table')} ${order.tableNumber}` : order.reference}
                   </div>
-                  <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Clock size={12} /> {timeHHMM(order.createdAt)}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                    <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Clock size={12} /> {timeHHMM(order.createdAt)}
+                    </span>
+                    <button onClick={() => printTicket(order)} title={t('kitchen.print')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', padding: 2 }}>
+                      <Printer size={16} />
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>

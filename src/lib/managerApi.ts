@@ -233,6 +233,23 @@ export async function deleteProduct(productId: string): Promise<void> {
 }
 
 /**
+ * Uploads a photo for a product to the public `menus` bucket and stores its URL
+ * on the product. Returns the public URL. Paths are unique (timestamped) so we
+ * never need to overwrite existing objects.
+ */
+export async function uploadProductImage(establishmentId: string, productId: string, file: File): Promise<string> {
+  if (!supabase) throw new Error('Supabase is not configured');
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const path = `products/${establishmentId}/${productId}-${Date.now()}.${ext}`;
+  const { error: upErr } = await supabase.storage.from('menus').upload(path, file, { upsert: false });
+  if (upErr) throw upErr;
+  const url = supabase.storage.from('menus').getPublicUrl(path).data.publicUrl;
+  const { error } = await supabase.from('products').update({ image_url: url }).eq('id', productId);
+  if (error) throw error;
+  return url;
+}
+
+/**
  * Sends a natural-language management request to the AI Manager Edge Function
  * and returns its reply. Throws on transport/function errors.
  */
