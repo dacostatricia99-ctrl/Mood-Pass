@@ -3,6 +3,7 @@ import { EstablishmentHome } from './pages/EstablishmentHome';
 import { ManagerDashboard } from './pages/ManagerDashboard';
 import { KitchenDisplay } from './pages/KitchenDisplay';
 import { StatsView } from './pages/StatsView';
+import { SettingsPage } from './pages/SettingsPage';
 import { Onboarding } from './pages/Onboarding';
 import { Login } from './pages/Login';
 import { RequireAuth } from './components/RequireAuth';
@@ -32,6 +33,7 @@ function App() {
             <Route path="/manager/:slug" element={<RequireAuth><ManagerDashboard /></RequireAuth>} />
             <Route path="/kitchen/:slug" element={<RequireAuth><KitchenDisplay /></RequireAuth>} />
             <Route path="/stats/:slug" element={<RequireAuth><StatsView /></RequireAuth>} />
+            <Route path="/settings/:slug" element={<RequireAuth><SettingsPage /></RequireAuth>} />
             <Route path="*" element={<ScanPrompt />} />
           </Routes>
         </Router>

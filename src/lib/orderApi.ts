@@ -8,6 +8,23 @@ export interface PlacedOrder {
   source: 'remote' | 'local';
 }
 
+/**
+ * Kicks off a mobile-money payment for an order via the create-payment edge
+ * function (which uses the restaurant's own CinetPay keys). Returns a redirect
+ * URL for the real flow, or { simulated } in sandbox mode.
+ */
+export async function startMobilePayment(
+  orderId: string,
+  establishmentId: string,
+): Promise<{ paymentUrl?: string; simulated?: boolean; error?: string }> {
+  if (!supabase) return { error: 'not-configured' };
+  const { data, error } = await supabase.functions.invoke('create-payment', {
+    body: { order_id: orderId, establishment_id: establishmentId, return_url: window.location.href },
+  });
+  if (error) return { error: error.message };
+  return { paymentUrl: data?.payment_url, simulated: Boolean(data?.simulated || data?.paid) };
+}
+
 export type TrackStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
 
 /**

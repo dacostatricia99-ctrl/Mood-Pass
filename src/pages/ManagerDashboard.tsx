@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode, BellRing, ChefHat, BarChart3 } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { QRCodeModal } from '../components/QRCodeModal';
@@ -24,6 +24,7 @@ interface ChatMessage {
 
 export function ManagerDashboard() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { session, isConfigured, signOut } = useAuth();
   const [query, setQuery] = useState('');
@@ -297,7 +298,7 @@ export function ManagerDashboard() {
           <span style={{ fontSize: 10, fontWeight: 500 }}>{t('nav.menu')}</span>
         </button>
         <button
-          onClick={() => setShowQR(true)}
+          onClick={() => slug && navigate(`/settings/${slug}`)}
           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
         >
           <Settings size={24} />

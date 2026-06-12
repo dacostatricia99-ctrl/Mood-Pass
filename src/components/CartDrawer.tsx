@@ -3,7 +3,7 @@ import { useCartStore } from '../store/cartStore';
 import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle, Wallet, Smartphone } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
-import { createOrder, fetchOrderStatus, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
+import { createOrder, fetchOrderStatus, startMobilePayment, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
 import { formatPrice } from '../lib/format';
 
 type Status = 'idle' | 'placing' | 'error' | 'success';
@@ -55,15 +55,28 @@ export function CartDrawer({ currency, mobileMoneyEnabled }: CartDrawerProps) {
 
   const handleCheckout = async () => {
     if (items.length === 0 || status === 'placing') return;
+    const establishmentId = items[0].establishment_id;
     setStatus('placing');
     try {
       const order = await createOrder({
-        establishmentId: items[0].establishment_id,
+        establishmentId,
         items,
         total: getCartTotal(),
         tableNumber,
         paymentMethod,
       });
+
+      // Mobile money: kick off the provider payment. A real flow redirects to
+      // the provider's checkout; sandbox marks the order paid immediately and
+      // we fall through to the confirmation screen.
+      if (paymentMethod === 'mobile_money' && order.source === 'remote') {
+        const res = await startMobilePayment(order.id, establishmentId);
+        if (res.paymentUrl) {
+          window.location.href = res.paymentUrl;
+          return; // leaving the app for the provider's checkout
+        }
+      }
+
       setReference(order.reference);
       setPlacedOrder(order);
       setTrackStatus('pending');

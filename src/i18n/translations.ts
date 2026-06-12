@@ -70,6 +70,15 @@ export type TranslationKey =
   | 'orders.paid'
   | 'orders.unpaid'
   | 'orders.markPaid'
+  | 'pay.mmTitle'
+  | 'pay.mmHint'
+  | 'pay.siteId'
+  | 'pay.apiKey'
+  | 'pay.sandbox'
+  | 'pay.enable'
+  | 'pay.sandboxNote'
+  | 'pay.save'
+  | 'pay.saved'
   // App fallback
   | 'home.scanPrompt'
   // Onboarding
@@ -201,6 +210,15 @@ export const translations: Record<Language, Dictionary> = {
     'orders.paid': 'Payé',
     'orders.unpaid': 'Non payé',
     'orders.markPaid': 'Marquer payé',
+    'pay.mmTitle': 'Paiement Mobile Money',
+    'pay.mmHint': 'Connectez votre compte CinetPay pour encaisser par Wave, Orange Money, MTN, Moov. L\'argent va directement sur votre compte.',
+    'pay.siteId': 'Site ID',
+    'pay.apiKey': 'Clé API',
+    'pay.sandbox': 'Mode test (sandbox)',
+    'pay.enable': 'Activer le paiement mobile',
+    'pay.sandboxNote': 'En mode test, les paiements sont simulés (aucun argent réel n\'est débité).',
+    'pay.save': 'Enregistrer',
+    'pay.saved': 'Enregistré !',
     'home.scanPrompt': "Veuillez scanner le QR Code d'un établissement pour accéder à son menu.",
     'onboarding.title': 'Créer votre Menu',
     'onboarding.subtitle': "Laissez l'IA faire le travail. Prenez votre menu en photo, nous nous occupons du reste.",
@@ -324,6 +342,15 @@ export const translations: Record<Language, Dictionary> = {
     'orders.paid': 'Paid',
     'orders.unpaid': 'Unpaid',
     'orders.markPaid': 'Mark paid',
+    'pay.mmTitle': 'Mobile Money payment',
+    'pay.mmHint': 'Connect your CinetPay account to accept Wave, Orange Money, MTN, Moov. Money goes straight to your account.',
+    'pay.siteId': 'Site ID',
+    'pay.apiKey': 'API key',
+    'pay.sandbox': 'Test mode (sandbox)',
+    'pay.enable': 'Enable mobile payment',
+    'pay.sandboxNote': 'In test mode, payments are simulated (no real money is charged).',
+    'pay.save': 'Save',
+    'pay.saved': 'Saved!',
     'home.scanPrompt': "Please scan an establishment's QR code to access its menu.",
     'onboarding.title': 'Create your Menu',
     'onboarding.subtitle': 'Let AI do the work. Take a photo of your menu and we handle the rest.',
@@ -447,6 +474,15 @@ export const translations: Record<Language, Dictionary> = {
     'orders.paid': 'مدفوع',
     'orders.unpaid': 'غير مدفوع',
     'orders.markPaid': 'تحديد كمدفوع',
+    'pay.mmTitle': 'الدفع عبر الهاتف',
+    'pay.mmHint': 'اربط حساب CinetPay لقبول Wave وOrange Money وMTN وMoov. تذهب الأموال مباشرة إلى حسابك.',
+    'pay.siteId': 'معرّف الموقع',
+    'pay.apiKey': 'مفتاح API',
+    'pay.sandbox': 'وضع الاختبار',
+    'pay.enable': 'تفعيل الدفع عبر الهاتف',
+    'pay.sandboxNote': 'في وضع الاختبار، تكون المدفوعات محاكاة (لا يتم خصم أموال حقيقية).',
+    'pay.save': 'حفظ',
+    'pay.saved': 'تم الحفظ!',
     'home.scanPrompt': 'يرجى مسح رمز QR الخاص بالمنشأة للوصول إلى قائمتها.',
     'onboarding.title': 'أنشئ قائمتك',
     'onboarding.subtitle': 'دع الذكاء الاصطناعي يقوم بالعمل. التقط صورة لقائمتك وسنتولى الباقي.',
@@ -570,6 +606,15 @@ export const translations: Record<Language, Dictionary> = {
     'orders.paid': 'Pago',
     'orders.unpaid': 'Não pago',
     'orders.markPaid': 'Marcar como pago',
+    'pay.mmTitle': 'Pagamento Mobile Money',
+    'pay.mmHint': 'Ligue a sua conta CinetPay para receber via Wave, Orange Money, MTN, Moov. O dinheiro vai diretamente para a sua conta.',
+    'pay.siteId': 'Site ID',
+    'pay.apiKey': 'Chave API',
+    'pay.sandbox': 'Modo de teste (sandbox)',
+    'pay.enable': 'Ativar pagamento móvel',
+    'pay.sandboxNote': 'No modo de teste, os pagamentos são simulados (nenhum dinheiro real é cobrado).',
+    'pay.save': 'Guardar',
+    'pay.saved': 'Guardado!',
     'home.scanPrompt': 'Leia o código QR de um estabelecimento para aceder ao seu menu.',
     'onboarding.title': 'Criar o seu Menu',
     'onboarding.subtitle': 'Deixe a IA fazer o trabalho. Tire uma foto do seu menu e nós tratamos do resto.',
@@ -693,6 +738,15 @@ export const translations: Record<Language, Dictionary> = {
     'orders.paid': '已支付',
     'orders.unpaid': '未支付',
     'orders.markPaid': '标记为已支付',
+    'pay.mmTitle': '移动支付',
+    'pay.mmHint': '连接您的 CinetPay 账户以接受 Wave、Orange Money、MTN、Moov。资金直接进入您的账户。',
+    'pay.siteId': '站点 ID',
+    'pay.apiKey': 'API 密钥',
+    'pay.sandbox': '测试模式（沙盒）',
+    'pay.enable': '启用移动支付',
+    'pay.sandboxNote': '在测试模式下，支付为模拟操作（不会扣除真实款项）。',
+    'pay.save': '保存',
+    'pay.saved': '已保存！',
     'home.scanPrompt': '请扫描商家的二维码以查看其菜单。',
     'onboarding.title': '创建您的菜单',
     'onboarding.subtitle': '让 AI 来完成工作。拍下您的菜单照片，其余的交给我们。',
