@@ -3,7 +3,7 @@ import { useCartStore } from '../store/cartStore';
 import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle, Wallet, Smartphone } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
-import { createOrder, fetchOrderStatus, startMobilePayment, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
+import { createOrder, fetchOrderStatus, startMobilePayment, saveLastOrder, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
 import { formatPrice } from '../lib/format';
 
 type Status = 'idle' | 'placing' | 'error' | 'success';
@@ -11,9 +11,10 @@ type Status = 'idle' | 'placing' | 'error' | 'success';
 interface CartDrawerProps {
   currency: string;
   mobileMoneyEnabled: boolean;
+  slug?: string;
 }
 
-export function CartDrawer({ currency, mobileMoneyEnabled }: CartDrawerProps) {
+export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerProps) {
   const { items, isDrawerOpen, toggleDrawer, updateQuantity, getCartTotal, clearCart } = useCartStore();
   const { language, t } = useTranslation();
 
@@ -77,6 +78,9 @@ export function CartDrawer({ currency, mobileMoneyEnabled }: CartDrawerProps) {
         }
       }
 
+      if (order.source === 'remote' && slug) {
+        saveLastOrder({ id: order.id, reference: order.reference, slug, ts: Date.now() });
+      }
       setReference(order.reference);
       setPlacedOrder(order);
       setTrackStatus('pending');

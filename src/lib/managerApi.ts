@@ -93,6 +93,44 @@ export async function fetchMyEstablishments(): Promise<MyEstablishment[]> {
   return data as MyEstablishment[];
 }
 
+export interface EstablishmentSettings {
+  id: string;
+  name: string;
+  currency: string;
+  phone: string | null;
+}
+
+/** Loads editable establishment details from its slug (owner-facing). */
+export async function getEstablishmentSettings(slug: string): Promise<EstablishmentSettings | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('establishments')
+    .select('id, name, currency, phone')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error || !data) return null;
+  return {
+    id: data.id as string,
+    name: (data.name as string) ?? '',
+    currency: (data.currency as string) ?? 'FCFA',
+    phone: (data.phone as string) ?? null,
+  };
+}
+
+/** Updates editable establishment details (owner-only via RLS). */
+export async function updateEstablishment(
+  id: string,
+  patch: { name?: string; currency?: string; phone?: string | null },
+): Promise<void> {
+  if (!supabase) return;
+  const clean: Record<string, unknown> = {};
+  if (patch.name !== undefined) clean.name = patch.name.trim();
+  if (patch.currency !== undefined) clean.currency = patch.currency.trim() || 'FCFA';
+  if (patch.phone !== undefined) clean.phone = patch.phone?.toString().trim() || null;
+  const { error } = await supabase.from('establishments').update(clean).eq('id', id);
+  if (error) throw error;
+}
+
 /** Resolves an establishment (id + currency) from its slug, or null. */
 export async function fetchEstablishmentBySlug(slug: string): Promise<ManagerEstablishment | null> {
   if (!supabase) return null;

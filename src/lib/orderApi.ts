@@ -27,6 +27,47 @@ export async function startMobilePayment(
 
 export type TrackStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
 
+export interface LastOrder {
+  id: string;
+  reference: string;
+  slug: string;
+  ts: number;
+}
+
+const LAST_ORDER_KEY = 'moodpass.lastOrder';
+// Stop offering to track an order after this long (orders are short-lived).
+const LAST_ORDER_TTL_MS = 3 * 60 * 60 * 1000;
+
+/** Remembers the customer's most recent order so they can re-open its tracker. */
+export function saveLastOrder(order: LastOrder): void {
+  try {
+    localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order));
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+/** Returns the saved order for the given slug if recent enough, else null. */
+export function getLastOrder(slug: string): LastOrder | null {
+  try {
+    const raw = localStorage.getItem(LAST_ORDER_KEY);
+    if (!raw) return null;
+    const o = JSON.parse(raw) as LastOrder;
+    if (o.slug !== slug || Date.now() - o.ts > LAST_ORDER_TTL_MS) return null;
+    return o;
+  } catch {
+    return null;
+  }
+}
+
+export function clearLastOrder(): void {
+  try {
+    localStorage.removeItem(LAST_ORDER_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * Reads the current status of a single order by id, for customer tracking.
  * Uses the `get_order_status` RPC (SECURITY DEFINER) since anonymous customers

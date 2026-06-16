@@ -1,16 +1,30 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { EstablishmentHome } from './pages/EstablishmentHome';
-import { ManagerDashboard } from './pages/ManagerDashboard';
-import { ManagerHome } from './pages/ManagerHome';
-import { KitchenDisplay } from './pages/KitchenDisplay';
-import { StatsView } from './pages/StatsView';
-import { SettingsPage } from './pages/SettingsPage';
-import { Onboarding } from './pages/Onboarding';
-import { Login } from './pages/Login';
 import { RequireAuth } from './components/RequireAuth';
 import { SubscriptionGate } from './components/SubscriptionGate';
 import { LanguageProvider, useTranslation } from './i18n/LanguageContext';
 import { AuthProvider } from './lib/AuthContext';
+
+// Manager-facing pages are lazy-loaded so the customer menu (the QR target)
+// ships the smallest possible bundle.
+const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then((m) => ({ default: m.ManagerDashboard })));
+const ManagerHome = lazy(() => import('./pages/ManagerHome').then((m) => ({ default: m.ManagerHome })));
+const KitchenDisplay = lazy(() => import('./pages/KitchenDisplay').then((m) => ({ default: m.KitchenDisplay })));
+const StatsView = lazy(() => import('./pages/StatsView').then((m) => ({ default: m.StatsView })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const Onboarding = lazy(() => import('./pages/Onboarding').then((m) => ({ default: m.Onboarding })));
+const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })));
+
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', height: '100dvh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', color: 'var(--primary-accent)' }}>
+      <Loader2 size={32} style={{ animation: 'spin 1s linear infinite' }} />
+      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
 
 function ScanPrompt() {
   const { t } = useTranslation();
@@ -29,6 +43,7 @@ function App() {
     <LanguageProvider>
       <AuthProvider>
         <Router>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Customer-facing: anonymous */}
             <Route path="/e/:slug" element={<EstablishmentHome />} />
@@ -42,6 +57,7 @@ function App() {
             <Route path="/settings/:slug" element={<RequireAuth><SubscriptionGate><SettingsPage /></SubscriptionGate></RequireAuth>} />
             <Route path="*" element={<ScanPrompt />} />
           </Routes>
+          </Suspense>
         </Router>
       </AuthProvider>
     </LanguageProvider>

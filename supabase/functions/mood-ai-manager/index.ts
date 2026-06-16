@@ -76,9 +76,42 @@ serve(async (req) => {
       replyText = `Le produit "${actionIntent.details.name}" a été ajouté à ${actionIntent.details.price} FCFA.`;
       dbResult = data;
     }
-    // Add other cases (UPDATE_PRICE, etc.) here
+    else if (['UPDATE_PRICE', 'TOGGLE_AVAILABILITY', 'REMOVE_PRODUCT'].includes(actionIntent.action)) {
+      // These act on an existing product matched by name (RLS scopes it to the owner).
+      const name = actionIntent.details?.name as string | undefined;
+      if (!name) throw new Error('Nom du produit manquant.');
+
+      const { data: found, error: findError } = await supabase
+        .from('products')
+        .select('id, name, is_available')
+        .eq('establishment_id', establishment_id)
+        .ilike('name', name)
+        .limit(1);
+      if (findError) throw findError;
+      const product = found?.[0];
+
+      if (!product) {
+        replyText = `Aucun produit nommé "${name}" n'a été trouvé.`;
+      } else if (actionIntent.action === 'UPDATE_PRICE') {
+        const price = actionIntent.details.price;
+        const { data, error } = await supabase.from('products').update({ price }).eq('id', product.id).select();
+        if (error) throw error;
+        replyText = `Le prix de "${product.name}" est maintenant ${price} FCFA.`;
+        dbResult = data;
+      } else if (actionIntent.action === 'TOGGLE_AVAILABILITY') {
+        const next = !product.is_available;
+        const { data, error } = await supabase.from('products').update({ is_available: next }).eq('id', product.id).select();
+        if (error) throw error;
+        replyText = `"${product.name}" est désormais ${next ? 'disponible' : 'indisponible'}.`;
+        dbResult = data;
+      } else {
+        const { error } = await supabase.from('products').delete().eq('id', product.id);
+        if (error) throw error;
+        replyText = `Le produit "${product.name}" a été supprimé.`;
+      }
+    }
     else {
-      replyText = `L'action ${actionIntent.action} a été reconnue mais n'est pas encore implémentée dans ce MVP.`;
+      replyText = `L'action ${actionIntent.action} n'est pas reconnue.`;
     }
 
     return new Response(

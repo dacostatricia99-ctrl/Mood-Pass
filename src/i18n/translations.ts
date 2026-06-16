@@ -79,6 +79,10 @@ export type TranslationKey =
   | 'pay.sandboxNote'
   | 'pay.save'
   | 'pay.saved'
+  | 'settings.details'
+  | 'settings.name'
+  | 'settings.currency'
+  | 'settings.phone'
   // App fallback
   | 'home.scanPrompt'
   // Onboarding
@@ -233,6 +237,10 @@ export const translations: Record<Language, Dictionary> = {
     'pay.sandboxNote': 'En mode test, les paiements sont simulés (aucun argent réel n\'est débité).',
     'pay.save': 'Enregistrer',
     'pay.saved': 'Enregistré !',
+    'settings.details': 'Détails de l\'établissement',
+    'settings.name': 'Nom',
+    'settings.currency': 'Devise',
+    'settings.phone': 'Téléphone',
     'home.scanPrompt': "Veuillez scanner le QR Code d'un établissement pour accéder à son menu.",
     'onboarding.title': 'Créer votre Menu',
     'onboarding.subtitle': "Laissez l'IA faire le travail. Prenez votre menu en photo, nous nous occupons du reste.",
@@ -379,6 +387,10 @@ export const translations: Record<Language, Dictionary> = {
     'pay.sandboxNote': 'In test mode, payments are simulated (no real money is charged).',
     'pay.save': 'Save',
     'pay.saved': 'Saved!',
+    'settings.details': 'Establishment details',
+    'settings.name': 'Name',
+    'settings.currency': 'Currency',
+    'settings.phone': 'Phone',
     'home.scanPrompt': "Please scan an establishment's QR code to access its menu.",
     'onboarding.title': 'Create your Menu',
     'onboarding.subtitle': 'Let AI do the work. Take a photo of your menu and we handle the rest.',
@@ -525,6 +537,10 @@ export const translations: Record<Language, Dictionary> = {
     'pay.sandboxNote': 'في وضع الاختبار، تكون المدفوعات محاكاة (لا يتم خصم أموال حقيقية).',
     'pay.save': 'حفظ',
     'pay.saved': 'تم الحفظ!',
+    'settings.details': 'تفاصيل المنشأة',
+    'settings.name': 'الاسم',
+    'settings.currency': 'العملة',
+    'settings.phone': 'الهاتف',
     'home.scanPrompt': 'يرجى مسح رمز QR الخاص بالمنشأة للوصول إلى قائمتها.',
     'onboarding.title': 'أنشئ قائمتك',
     'onboarding.subtitle': 'دع الذكاء الاصطناعي يقوم بالعمل. التقط صورة لقائمتك وسنتولى الباقي.',
@@ -671,6 +687,10 @@ export const translations: Record<Language, Dictionary> = {
     'pay.sandboxNote': 'No modo de teste, os pagamentos são simulados (nenhum dinheiro real é cobrado).',
     'pay.save': 'Guardar',
     'pay.saved': 'Guardado!',
+    'settings.details': 'Detalhes do estabelecimento',
+    'settings.name': 'Nome',
+    'settings.currency': 'Moeda',
+    'settings.phone': 'Telefone',
     'home.scanPrompt': 'Leia o código QR de um estabelecimento para aceder ao seu menu.',
     'onboarding.title': 'Criar o seu Menu',
     'onboarding.subtitle': 'Deixe a IA fazer o trabalho. Tire uma foto do seu menu e nós tratamos do resto.',
@@ -817,6 +837,10 @@ export const translations: Record<Language, Dictionary> = {
     'pay.sandboxNote': '在测试模式下，支付为模拟操作（不会扣除真实款项）。',
     'pay.save': '保存',
     'pay.saved': '已保存！',
+    'settings.details': '店铺详情',
+    'settings.name': '名称',
+    'settings.currency': '货币',
+    'settings.phone': '电话',
     'home.scanPrompt': '请扫描商家的二维码以查看其菜单。',
     'onboarding.title': '创建您的菜单',
     'onboarding.subtitle': '让 AI 来完成工作。拍下您的菜单照片，其余的交给我们。',

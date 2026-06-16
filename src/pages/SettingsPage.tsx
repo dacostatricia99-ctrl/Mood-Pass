@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Settings as SettingsIcon, Smartphone, Check, Loader2, Info } from 'lucide-react';
+import { Settings as SettingsIcon, Smartphone, Check, Loader2, Info, Store } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { useAuth } from '../lib/AuthContext';
-import { fetchEstablishmentBySlug, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
+import { getEstablishmentSettings, updateEstablishment, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
 
 const EMPTY: PaymentConfig = { siteId: '', apiKey: '', sandbox: true, enabled: false };
 
@@ -13,6 +13,9 @@ export function SettingsPage() {
   const { t } = useTranslation();
   const { isConfigured } = useAuth();
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
+  const [details, setDetails] = useState({ name: '', currency: 'FCFA', phone: '' });
+  const [savedDetails, setSavedDetails] = useState(false);
+  const [savingDetails, setSavingDetails] = useState(false);
   const [cfg, setCfg] = useState<PaymentConfig>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,9 +27,10 @@ export function SettingsPage() {
       return;
     }
     let active = true;
-    fetchEstablishmentBySlug(slug).then(async (est) => {
+    getEstablishmentSettings(slug).then(async (est) => {
       if (!active || !est) return;
       setEstablishmentId(est.id);
+      setDetails({ name: est.name, currency: est.currency, phone: est.phone ?? '' });
       const existing = await getPaymentConfig(est.id);
       if (active && existing) setCfg(existing);
       if (active) setLoading(false);
@@ -35,6 +39,21 @@ export function SettingsPage() {
       active = false;
     };
   }, [slug, isConfigured]);
+
+  const handleSaveDetails = async () => {
+    if (!establishmentId || savingDetails) return;
+    setSavingDetails(true);
+    setSavedDetails(false);
+    try {
+      await updateEstablishment(establishmentId, details);
+      setSavedDetails(true);
+      setTimeout(() => setSavedDetails(false), 2500);
+    } catch {
+      /* ignore */
+    } finally {
+      setSavingDetails(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!establishmentId) return;
@@ -73,6 +92,30 @@ export function SettingsPage() {
             {t('menu.demoNotice')}
           </div>
         ) : (
+          <>
+          {/* Establishment details */}
+          <div className="glass-panel" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            <h2 style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)' }}>
+              <Store size={18} color="var(--primary-accent)" /> {t('settings.details')}
+            </h2>
+            <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
+              {t('settings.name')}
+              <input value={details.name} onChange={(e) => setDetails({ ...details, name: e.target.value })} style={{ ...field, marginTop: 4 }} />
+            </label>
+            <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
+              {t('settings.currency')}
+              <input value={details.currency} onChange={(e) => setDetails({ ...details, currency: e.target.value })} placeholder="FCFA" style={{ ...field, marginTop: 4 }} />
+            </label>
+            <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
+              {t('settings.phone')}
+              <input value={details.phone} onChange={(e) => setDetails({ ...details, phone: e.target.value })} inputMode="tel" style={{ ...field, marginTop: 4 }} />
+            </label>
+            <button onClick={handleSaveDetails} disabled={savingDetails} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {savingDetails ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : savedDetails ? <Check size={18} /> : null}
+              {savedDetails ? t('pay.saved') : t('pay.save')}
+            </button>
+          </div>
+
           <div className="glass-panel" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
             <h2 style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)' }}>
               <Smartphone size={18} color="var(--primary-accent)" /> {t('pay.mmTitle')}
@@ -109,6 +152,7 @@ export function SettingsPage() {
             </button>
             <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
           </div>
+          </>
         )}
       </main>
     </div>
