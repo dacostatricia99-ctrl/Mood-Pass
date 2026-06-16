@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 import { mockCategories, mockProducts } from '../i18n/menuData';
 
 export interface EstablishmentMenu {
+  name: string | null;
   categories: Category[];
   products: Product[];
   currency: string;
@@ -11,6 +12,7 @@ export interface EstablishmentMenu {
 }
 
 const MOCK_MENU: EstablishmentMenu = {
+  name: null,
   categories: mockCategories,
   products: mockProducts,
   currency: 'FCFA',
@@ -33,7 +35,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
   // 1. Resolve the establishment from its slug.
   const { data: establishment, error: estError } = await supabase
     .from('establishments')
-    .select('id, currency, mobile_money_enabled')
+    .select('id, name, currency, mobile_money_enabled')
     .eq('slug', slug)
     .maybeSingle();
 
@@ -62,6 +64,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
   }
 
   return {
+    name: ((establishment as { name?: string }).name) ?? null,
     categories: (categoriesResult.data as Category[]) ?? [],
     products: products as Product[],
     currency: (establishment.currency as string) ?? 'FCFA',

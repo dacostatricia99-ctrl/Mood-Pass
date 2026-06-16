@@ -32,6 +32,27 @@ function shortRef(id: string): string {
   return `#${id.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase()}`;
 }
 
+export interface MyEstablishment {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+/** Lists the establishments owned by the current user (for the manager home). */
+export async function fetchMyEstablishments(): Promise<MyEstablishment[]> {
+  if (!supabase) return [];
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) return [];
+  const { data, error } = await supabase
+    .from('establishments')
+    .select('id, name, slug')
+    .eq('owner_id', uid)
+    .order('created_at', { ascending: true });
+  if (error || !data) return [];
+  return data as MyEstablishment[];
+}
+
 /** Resolves an establishment (id + currency) from its slug, or null. */
 export async function fetchEstablishmentBySlug(slug: string): Promise<ManagerEstablishment | null> {
   if (!supabase) return null;

@@ -18,7 +18,7 @@ export function Login() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
-  const from = (location.state as { from?: string } | null)?.from ?? '/onboarding';
+  const from = (location.state as { from?: string } | null)?.from ?? '/app';
 
   // Already signed in (or no backend): nothing to do here.
   if (session) return <Navigate to={from} replace />;

@@ -126,6 +126,11 @@ export type TranslationKey =
   | 'nav.orders'
   | 'nav.menu'
   | 'nav.settings'
+  | 'app.title'
+  | 'app.managerArea'
+  | 'app.newEstablishment'
+  | 'app.empty'
+  | 'app.openDashboard'
   // Orders management
   | 'orders.empty'
   | 'orders.accept'
@@ -263,6 +268,11 @@ export const translations: Record<Language, Dictionary> = {
     'nav.orders': 'Commandes',
     'nav.menu': 'Menu',
     'nav.settings': 'Réglages',
+    'app.title': 'Espace gérant',
+    'app.managerArea': 'Espace gérant →',
+    'app.newEstablishment': 'Nouvel établissement',
+    'app.empty': 'Vous n\'avez pas encore d\'établissement.',
+    'app.openDashboard': 'Tableau de bord',
     'orders.empty': 'Aucune commande pour le moment.',
     'orders.accept': 'Accepter',
     'orders.complete': 'Terminer',
@@ -395,6 +405,11 @@ export const translations: Record<Language, Dictionary> = {
     'nav.orders': 'Orders',
     'nav.menu': 'Menu',
     'nav.settings': 'Settings',
+    'app.title': 'Manager area',
+    'app.managerArea': 'Manager area →',
+    'app.newEstablishment': 'New establishment',
+    'app.empty': 'You don\'t have any establishment yet.',
+    'app.openDashboard': 'Dashboard',
     'orders.empty': 'No orders yet.',
     'orders.accept': 'Accept',
     'orders.complete': 'Complete',
@@ -527,6 +542,11 @@ export const translations: Record<Language, Dictionary> = {
     'nav.orders': 'الطلبات',
     'nav.menu': 'القائمة',
     'nav.settings': 'الإعدادات',
+    'app.title': 'مساحة المدير',
+    'app.managerArea': 'مساحة المدير ←',
+    'app.newEstablishment': 'منشأة جديدة',
+    'app.empty': 'ليس لديك أي منشأة بعد.',
+    'app.openDashboard': 'لوحة التحكم',
     'orders.empty': 'لا توجد طلبات حتى الآن.',
     'orders.accept': 'قبول',
     'orders.complete': 'إنهاء',
@@ -659,6 +679,11 @@ export const translations: Record<Language, Dictionary> = {
     'nav.orders': 'Pedidos',
     'nav.menu': 'Menu',
     'nav.settings': 'Definições',
+    'app.title': 'Área do gestor',
+    'app.managerArea': 'Área do gestor →',
+    'app.newEstablishment': 'Novo estabelecimento',
+    'app.empty': 'Ainda não tem nenhum estabelecimento.',
+    'app.openDashboard': 'Painel',
     'orders.empty': 'Ainda não há pedidos.',
     'orders.accept': 'Aceitar',
     'orders.complete': 'Concluir',
@@ -791,6 +816,11 @@ export const translations: Record<Language, Dictionary> = {
     'nav.orders': '订单',
     'nav.menu': '菜单',
     'nav.settings': '设置',
+    'app.title': '管理后台',
+    'app.managerArea': '管理后台 →',
+    'app.newEstablishment': '新建店铺',
+    'app.empty': '您还没有任何店铺。',
+    'app.openDashboard': '管理面板',
     'orders.empty': '暂无订单。',
     'orders.accept': '接受',
     'orders.complete': '完成',

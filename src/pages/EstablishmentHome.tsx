@@ -31,14 +31,17 @@ export function EstablishmentHome() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [currency, setCurrency] = useState('FCFA');
   const [mobileMoneyEnabled, setMobileMoneyEnabled] = useState(false);
+  const [name, setName] = useState<string | null>(null);
 
   const totalItems = getTotalItems();
-  const establishmentName = slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'MoodPass';
+  const slugName = slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'MoodPass';
+  const establishmentName = name || slugName;
 
   useEffect(() => {
     let active = true;
-    fetchEstablishmentMenu(slug).then(({ products, categories, currency, mobileMoneyEnabled }) => {
+    fetchEstablishmentMenu(slug).then(({ name, products, categories, currency, mobileMoneyEnabled }) => {
       if (!active) return;
+      setName(name);
       setRawProducts(products);
       setCategories(categories);
       setCurrency(currency);
