@@ -38,6 +38,46 @@ export interface MyEstablishment {
   slug: string;
 }
 
+export interface Subscription {
+  status: 'trial' | 'active' | 'expired';
+  currentPeriodEnd: string;
+  /** True while the trial or paid period still covers the current time. */
+  active: boolean;
+}
+
+/** Reads an establishment's Mood Pass subscription (owner-only via RLS). */
+export async function getSubscription(establishmentId: string): Promise<Subscription | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('status, current_period_end')
+    .eq('establishment_id', establishmentId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const end = data.current_period_end as string;
+  return {
+    status: (data.status as Subscription['status']) ?? 'expired',
+    currentPeriodEnd: end,
+    active: new Date(end).getTime() >= Date.now(),
+  };
+}
+
+/**
+ * Starts a subscription payment (restaurant -> Mood Pass) via the platform's
+ * own provider account. Returns a redirect URL (real) or { simulated } (sandbox,
+ * which extends the subscription immediately).
+ */
+export async function startSubscriptionPayment(
+  establishmentId: string,
+): Promise<{ paymentUrl?: string; simulated?: boolean; error?: string }> {
+  if (!supabase) return { error: 'not-configured' };
+  const { data, error } = await supabase.functions.invoke('create-subscription-payment', {
+    body: { establishment_id: establishmentId, return_url: window.location.href },
+  });
+  if (error) return { error: error.message };
+  return { paymentUrl: data?.payment_url, simulated: Boolean(data?.simulated || data?.extended) };
+}
+
 /** Lists the establishments owned by the current user (for the manager home). */
 export async function fetchMyEstablishments(): Promise<MyEstablishment[]> {
   if (!supabase) return [];

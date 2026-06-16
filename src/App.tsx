@@ -8,6 +8,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { Onboarding } from './pages/Onboarding';
 import { Login } from './pages/Login';
 import { RequireAuth } from './components/RequireAuth';
+import { SubscriptionGate } from './components/SubscriptionGate';
 import { LanguageProvider, useTranslation } from './i18n/LanguageContext';
 import { AuthProvider } from './lib/AuthContext';
 
@@ -35,10 +36,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/app" element={<RequireAuth><ManagerHome /></RequireAuth>} />
             <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
-            <Route path="/manager/:slug" element={<RequireAuth><ManagerDashboard /></RequireAuth>} />
-            <Route path="/kitchen/:slug" element={<RequireAuth><KitchenDisplay /></RequireAuth>} />
-            <Route path="/stats/:slug" element={<RequireAuth><StatsView /></RequireAuth>} />
-            <Route path="/settings/:slug" element={<RequireAuth><SettingsPage /></RequireAuth>} />
+            <Route path="/manager/:slug" element={<RequireAuth><SubscriptionGate><ManagerDashboard /></SubscriptionGate></RequireAuth>} />
+            <Route path="/kitchen/:slug" element={<RequireAuth><SubscriptionGate><KitchenDisplay /></SubscriptionGate></RequireAuth>} />
+            <Route path="/stats/:slug" element={<RequireAuth><SubscriptionGate><StatsView /></SubscriptionGate></RequireAuth>} />
+            <Route path="/settings/:slug" element={<RequireAuth><SubscriptionGate><SettingsPage /></SubscriptionGate></RequireAuth>} />
             <Route path="*" element={<ScanPrompt />} />
           </Routes>
         </Router>

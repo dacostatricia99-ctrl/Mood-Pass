@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LayoutDashboard, BarChart3, ChefHat, LogOut, Store } from 'lucide-react';
+import { Plus, LayoutDashboard, BarChart3, ChefHat, LogOut, Store, CreditCard, Loader2 } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { useAuth } from '../lib/AuthContext';
-import { fetchMyEstablishments, type MyEstablishment } from '../lib/managerApi';
+import { fetchMyEstablishments, getSubscription, startSubscriptionPayment, type MyEstablishment, type Subscription } from '../lib/managerApi';
 
 export function ManagerHome() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { session, isConfigured, signOut } = useAuth();
   const [establishments, setEstablishments] = useState<MyEstablishment[]>([]);
+  const [subs, setSubs] = useState<Record<string, Subscription | null>>({});
+  const [paying, setPaying] = useState<string | null>(null);
   const [loading, setLoading] = useState(isConfigured);
 
   useEffect(() => {
@@ -19,16 +21,34 @@ export function ManagerHome() {
       return;
     }
     let active = true;
-    fetchMyEstablishments().then((list) => {
-      if (active) {
-        setEstablishments(list);
-        setLoading(false);
-      }
+    fetchMyEstablishments().then(async (list) => {
+      if (!active) return;
+      setEstablishments(list);
+      setLoading(false);
+      const entries = await Promise.all(list.map(async (e) => [e.id, await getSubscription(e.id)] as const));
+      if (active) setSubs(Object.fromEntries(entries));
     });
     return () => {
       active = false;
     };
   }, [isConfigured, session]);
+
+  const handleSubscribe = async (establishmentId: string) => {
+    if (paying) return;
+    setPaying(establishmentId);
+    const res = await startSubscriptionPayment(establishmentId);
+    if (res.paymentUrl) {
+      window.location.href = res.paymentUrl;
+      return;
+    }
+    if (res.simulated) {
+      const fresh = await getSubscription(establishmentId);
+      setSubs((prev) => ({ ...prev, [establishmentId]: fresh }));
+    }
+    setPaying(null);
+  };
+
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString();
 
   const linkBtn = (icon: React.ReactNode, label: string, to: string, primary = false) => (
     <button
@@ -73,9 +93,19 @@ export function ManagerHome() {
         ) : (
           establishments.map((e) => (
             <div key={e.id} className="glass-panel" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-              <div>
-                <div style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', color: 'var(--text-primary)' }}>{e.name}</div>
-                <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>/e/{e.slug}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', color: 'var(--text-primary)' }}>{e.name}</div>
+                  <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>/e/{e.slug}</div>
+                </div>
+                {subs[e.id] && (
+                  <span style={{ fontSize: 'var(--font-xs)', fontWeight: 600, padding: '3px 8px', borderRadius: 'var(--radius-full)', whiteSpace: 'nowrap',
+                    background: subs[e.id]!.active ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                    color: subs[e.id]!.active ? '#16a34a' : 'var(--primary-red)' }}>
+                    {subs[e.id]!.status === 'trial' ? t('sub.trialBadge') : subs[e.id]!.active ? t('sub.activeBadge') : t('sub.expiredBadge')}
+                    {' · '}{fmtDate(subs[e.id]!.currentPeriodEnd)}
+                  </span>
+                )}
               </div>
               <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
                 {linkBtn(<LayoutDashboard size={16} />, t('app.openDashboard'), `/manager/${e.slug}`, true)}
@@ -84,6 +114,12 @@ export function ManagerHome() {
                 {linkBtn(<BarChart3 size={15} />, t('stats.title'), `/stats/${e.slug}`)}
                 {linkBtn(<ChefHat size={15} />, t('kitchen.title'), `/kitchen/${e.slug}`)}
               </div>
+              {subs[e.id] && !subs[e.id]!.active && (
+                <button onClick={() => handleSubscribe(e.id)} disabled={paying === e.id} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  {paying === e.id ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <CreditCard size={16} />}
+                  {t('sub.subscribe')} · {t('sub.price')}
+                </button>
+              )}
             </div>
           ))
         )}

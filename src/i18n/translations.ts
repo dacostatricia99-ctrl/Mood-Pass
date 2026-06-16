@@ -131,6 +131,15 @@ export type TranslationKey =
   | 'app.newEstablishment'
   | 'app.empty'
   | 'app.openDashboard'
+  | 'sub.required'
+  | 'sub.expiredMsg'
+  | 'sub.price'
+  | 'sub.subscribe'
+  | 'sub.processing'
+  | 'sub.backHome'
+  | 'sub.trialBadge'
+  | 'sub.activeBadge'
+  | 'sub.expiredBadge'
   // Orders management
   | 'orders.empty'
   | 'orders.accept'
@@ -273,6 +282,15 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'Nouvel établissement',
     'app.empty': 'Vous n\'avez pas encore d\'établissement.',
     'app.openDashboard': 'Tableau de bord',
+    'sub.required': 'Abonnement requis',
+    'sub.expiredMsg': 'Pour gérer votre établissement, abonnez-vous à Mood Pass.',
+    'sub.price': '10 000 FCFA / mois',
+    'sub.subscribe': 'S\'abonner',
+    'sub.processing': 'Traitement...',
+    'sub.backHome': 'Retour à l\'espace gérant',
+    'sub.trialBadge': 'Essai',
+    'sub.activeBadge': 'Actif',
+    'sub.expiredBadge': 'Expiré',
     'orders.empty': 'Aucune commande pour le moment.',
     'orders.accept': 'Accepter',
     'orders.complete': 'Terminer',
@@ -410,6 +428,15 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'New establishment',
     'app.empty': 'You don\'t have any establishment yet.',
     'app.openDashboard': 'Dashboard',
+    'sub.required': 'Subscription required',
+    'sub.expiredMsg': 'To manage your establishment, subscribe to Mood Pass.',
+    'sub.price': '10,000 FCFA / month',
+    'sub.subscribe': 'Subscribe',
+    'sub.processing': 'Processing...',
+    'sub.backHome': 'Back to manager area',
+    'sub.trialBadge': 'Trial',
+    'sub.activeBadge': 'Active',
+    'sub.expiredBadge': 'Expired',
     'orders.empty': 'No orders yet.',
     'orders.accept': 'Accept',
     'orders.complete': 'Complete',
@@ -547,6 +574,15 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'منشأة جديدة',
     'app.empty': 'ليس لديك أي منشأة بعد.',
     'app.openDashboard': 'لوحة التحكم',
+    'sub.required': 'يلزم الاشتراك',
+    'sub.expiredMsg': 'لإدارة منشأتك، اشترك في Mood Pass.',
+    'sub.price': '10000 فرنك / شهر',
+    'sub.subscribe': 'اشترك',
+    'sub.processing': 'جارٍ المعالجة...',
+    'sub.backHome': 'العودة إلى مساحة المدير',
+    'sub.trialBadge': 'تجريبي',
+    'sub.activeBadge': 'نشط',
+    'sub.expiredBadge': 'منتهٍ',
     'orders.empty': 'لا توجد طلبات حتى الآن.',
     'orders.accept': 'قبول',
     'orders.complete': 'إنهاء',
@@ -684,6 +720,15 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'Novo estabelecimento',
     'app.empty': 'Ainda não tem nenhum estabelecimento.',
     'app.openDashboard': 'Painel',
+    'sub.required': 'Subscrição necessária',
+    'sub.expiredMsg': 'Para gerir o seu estabelecimento, subscreva o Mood Pass.',
+    'sub.price': '10 000 FCFA / mês',
+    'sub.subscribe': 'Subscrever',
+    'sub.processing': 'A processar...',
+    'sub.backHome': 'Voltar à área do gestor',
+    'sub.trialBadge': 'Teste',
+    'sub.activeBadge': 'Ativo',
+    'sub.expiredBadge': 'Expirado',
     'orders.empty': 'Ainda não há pedidos.',
     'orders.accept': 'Aceitar',
     'orders.complete': 'Concluir',
@@ -821,6 +866,15 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': '新建店铺',
     'app.empty': '您还没有任何店铺。',
     'app.openDashboard': '管理面板',
+    'sub.required': '需要订阅',
+    'sub.expiredMsg': '要管理您的店铺，请订阅 Mood Pass。',
+    'sub.price': '10,000 FCFA / 月',
+    'sub.subscribe': '订阅',
+    'sub.processing': '处理中...',
+    'sub.backHome': '返回管理后台',
+    'sub.trialBadge': '试用',
+    'sub.activeBadge': '有效',
+    'sub.expiredBadge': '已过期',
     'orders.empty': '暂无订单。',
     'orders.accept': '接受',
     'orders.complete': '完成',
