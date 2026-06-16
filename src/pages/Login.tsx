@@ -35,7 +35,9 @@ export function Login() {
     setStatus('idle');
 
     if (result.error) {
-      setError(result.error === 'not-configured' ? t('auth.notConfigured') : t('auth.error'));
+      // Surface the real reason (e.g. "Invalid login credentials") instead of a
+      // generic message, so a wrong password is obvious.
+      setError(result.error === 'not-configured' ? t('auth.notConfigured') : result.error);
       return;
     }
     if (result.needsConfirmation) {

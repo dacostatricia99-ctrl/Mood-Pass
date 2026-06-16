@@ -41,16 +41,27 @@ export function AdminDashboard() {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
-      <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)' }}>
-        <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <ShieldCheck size={20} /> Admin Mood Pass
-        </h1>
+      {/* Distinct dark header so the platform admin is never confused with a
+          restaurant's own (light) manager pages. */}
+      <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0f172a', color: 'white', borderBottom: '3px solid var(--primary-accent)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: 'var(--primary-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+            <ShieldCheck size={22} />
+          </div>
+          <div style={{ lineHeight: 1.15 }}>
+            <div style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>Administration</div>
+            <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: '#94a3b8' }}>Mood Pass · Plateforme</div>
+          </div>
+        </div>
         {session && (
-          <button onClick={signOut} style={{ background: 'var(--bg-surface-elevated)', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px 14px', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-sm)' }}>
+          <button onClick={signOut} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', padding: '8px 14px', borderRadius: 'var(--radius-full)', fontSize: 'var(--font-sm)' }}>
             Déconnexion
           </button>
         )}
       </header>
+      <div style={{ background: '#0f172a', color: '#94a3b8', fontSize: 'var(--font-xs)', textAlign: 'center', padding: '6px var(--space-md)' }}>
+        Vue d'ensemble de TOUS les établissements de la plateforme
+      </div>
 
       <main style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', maxWidth: 900, width: '100%', margin: '0 auto' }}>
         {loading ? (
