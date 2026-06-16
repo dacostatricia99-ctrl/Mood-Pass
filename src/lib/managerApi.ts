@@ -38,6 +38,41 @@ export interface MyEstablishment {
   slug: string;
 }
 
+export interface AdminRow {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  ownerEmail: string;
+  status: string;
+  currentPeriodEnd: string | null;
+  active: boolean;
+  orders: number;
+}
+
+export interface AdminOverview {
+  totals: { establishments: number; active: number; trial: number; expired: number; orders: number; mrr: number };
+  establishments: AdminRow[];
+}
+
+/** Platform super-admin overview (server enforces the admin email allowlist). */
+export async function fetchAdminOverview(): Promise<AdminOverview | { error: string }> {
+  if (!supabase) return { error: 'not-configured' };
+  const { data, error } = await supabase.functions.invoke('admin-overview', { body: {} });
+  if (error) return { error: error.message };
+  if (data?.error) return { error: data.error };
+  return data as AdminOverview;
+}
+
+/** Grants/extends 30 days of subscription to an establishment (admin only). */
+export async function adminGrant(establishmentId: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { data, error } = await supabase.functions.invoke('admin-overview', {
+    body: { action: 'grant', establishment_id: establishmentId },
+  });
+  return !error && Boolean(data?.ok);
+}
+
 export interface Subscription {
   status: 'trial' | 'active' | 'expired';
   currentPeriodEnd: string;

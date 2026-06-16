@@ -11,6 +11,7 @@ import { AuthProvider } from './lib/AuthContext';
 // ships the smallest possible bundle.
 const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then((m) => ({ default: m.ManagerDashboard })));
 const ManagerHome = lazy(() => import('./pages/ManagerHome').then((m) => ({ default: m.ManagerHome })));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
 const KitchenDisplay = lazy(() => import('./pages/KitchenDisplay').then((m) => ({ default: m.KitchenDisplay })));
 const StatsView = lazy(() => import('./pages/StatsView').then((m) => ({ default: m.StatsView })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
@@ -51,6 +52,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
             <Route path="/app" element={<RequireAuth><ManagerHome /></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
             <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
             <Route path="/manager/:slug" element={<RequireAuth><SubscriptionGate><ManagerDashboard /></SubscriptionGate></RequireAuth>} />
             <Route path="/kitchen/:slug" element={<RequireAuth><SubscriptionGate><KitchenDisplay /></SubscriptionGate></RequireAuth>} />
