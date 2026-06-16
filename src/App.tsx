@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { EstablishmentHome } from './pages/EstablishmentHome';
 import { RequireAuth } from './components/RequireAuth';
 import { SubscriptionGate } from './components/SubscriptionGate';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { LanguageProvider, useTranslation } from './i18n/LanguageContext';
 import { AuthProvider } from './lib/AuthContext';
 
@@ -44,6 +45,7 @@ function App() {
     <LanguageProvider>
       <AuthProvider>
         <Router>
+          <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Customer-facing: anonymous */}
@@ -61,6 +63,7 @@ function App() {
             <Route path="*" element={<ScanPrompt />} />
           </Routes>
           </Suspense>
+          </ErrorBoundary>
         </Router>
       </AuthProvider>
     </LanguageProvider>
