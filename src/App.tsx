@@ -49,6 +49,7 @@ function App() {
             <Route path="/e/:slug" element={<EstablishmentHome />} />
             {/* Manager-facing: protected (open in demo mode) */}
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Login />} />
             <Route path="/app" element={<RequireAuth><ManagerHome /></RequireAuth>} />
             <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
             <Route path="/manager/:slug" element={<RequireAuth><SubscriptionGate><ManagerDashboard /></SubscriptionGate></RequireAuth>} />

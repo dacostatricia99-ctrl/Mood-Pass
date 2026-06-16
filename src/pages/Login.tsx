@@ -11,7 +11,8 @@ export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
+  // A shared /register link lands directly on the sign-up form.
+  const [mode, setMode] = useState<'signIn' | 'signUp'>(location.pathname === '/register' ? 'signUp' : 'signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading'>('idle');
