@@ -41,33 +41,39 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'gpt-4o',
+        temperature: 0,
         messages: [
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `Tu es un assistant IA spécialisé dans la restauration. Extrais le nom de l'établissement (s'il est visible), les catégories, les produits, leurs descriptions et leurs prix depuis cette image de menu.
-                Renvoie le résultat strictement en JSON sous ce format:
-                {
-                  "establishment_name": "Nom",
-                  "categories": [
-                    {
-                      "name": "Catégorie 1",
-                      "products": [
-                        { "name": "Produit 1", "description": "Desc", "price": 1000 }
-                      ]
-                    }
-                  ]
-                }`
+                text: `Tu es un OCR expert pour menus de restaurant. TRANSCRIS EXACTEMENT le menu de l'image, sans rien inventer.
+
+RÈGLES STRICTES :
+- Recopie CHAQUE produit visible, sans en omettre ni en ajouter. N'invente jamais un produit, un prix ou une description.
+- Garde les noms et descriptions EXACTEMENT tels qu'écrits (même langue, même orthographe, mêmes accents). Ne traduis pas, ne reformule pas.
+- Prix : nombre exact tel qu'imprimé (sans le symbole de devise). Si un produit a plusieurs prix (tailles), prends le premier. Si aucun prix n'est lisible, mets 0.
+- Respecte les catégories/sections telles qu'écrites sur le menu. Si aucune catégorie n'est visible, mets tout dans une catégorie "Menu".
+- Description : uniquement si elle est écrite sur le menu, sinon chaîne vide.
+- Si un texte est illisible, ignore-le plutôt que de deviner.
+
+Renvoie STRICTEMENT ce JSON :
+{
+  "establishment_name": "Nom si visible, sinon vide",
+  "categories": [
+    { "name": "Nom exact de la section", "products": [ { "name": "Nom exact", "description": "Description si écrite sinon \\"\\"", "price": 1000 } ] }
+  ]
+}`
               },
               {
                 type: 'image_url',
-                image_url: { url: image_url }
+                image_url: { url: image_url, detail: 'high' }
               }
             ]
           }
         ],
+        max_tokens: 4096,
         response_format: { type: "json_object" }
       }),
     });

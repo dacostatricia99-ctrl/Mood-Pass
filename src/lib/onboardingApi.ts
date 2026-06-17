@@ -38,29 +38,46 @@ export async function generateMenuFromImage(params: { name: string; file: File }
   const ownerId = userData.user?.id;
   if (!ownerId) throw new Error('Not authenticated');
 
-  // 1. Create the establishment, retrying on slug collisions.
-  const baseSlug = slugify(name);
+  // One establishment per manager. Reuse the existing one if any — this makes
+  // retries idempotent: a failed generation never leaves an orphan, and
+  // clicking "Generate" again updates the same establishment instead of
+  // creating duplicates.
   let establishmentId = '';
   let slug = '';
 
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const candidate = attempt === 0 ? baseSlug : `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
-    const { data, error } = await supabase
-      .from('establishments')
-      .insert({ name, slug: candidate, owner_id: ownerId })
-      .select('id, slug')
-      .single();
+  const { data: mine } = await supabase
+    .from('establishments')
+    .select('id, slug')
+    .eq('owner_id', ownerId)
+    .order('created_at', { ascending: true })
+    .limit(1);
 
-    if (!error && data) {
-      establishmentId = data.id;
-      slug = data.slug;
-      break;
+  if (mine && mine.length > 0) {
+    establishmentId = mine[0].id;
+    slug = mine[0].slug;
+    await supabase.from('establishments').update({ name }).eq('id', establishmentId);
+    // Replace the previous menu rather than append to it (best-effort: skipped
+    // if a product is referenced by an existing order).
+    await supabase.from('categories').delete().eq('establishment_id', establishmentId);
+  } else {
+    // Create a new establishment, retrying on slug collisions.
+    const baseSlug = slugify(name);
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const candidate = attempt === 0 ? baseSlug : `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+      const { data, error } = await supabase
+        .from('establishments')
+        .insert({ name, slug: candidate, owner_id: ownerId })
+        .select('id, slug')
+        .single();
+      if (!error && data) {
+        establishmentId = data.id;
+        slug = data.slug;
+        break;
+      }
+      if (error && error.code !== '23505') throw error;
     }
-    // 23505 = unique_violation (slug already taken) → try another slug.
-    if (error && error.code !== '23505') throw error;
+    if (!establishmentId) throw new Error('Could not create establishment (slug unavailable)');
   }
-
-  if (!establishmentId) throw new Error('Could not create establishment (slug unavailable)');
 
   // 2. Upload the menu image to the public "menus" bucket.
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';

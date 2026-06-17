@@ -166,6 +166,13 @@ export async function updateEstablishment(
   if (error) throw error;
 }
 
+/** Deletes the manager's establishment (owner-checked server-side). */
+export async function deleteEstablishment(establishmentId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.rpc('delete_establishment', { est_id: establishmentId });
+  if (error) throw error;
+}
+
 /** Resolves an establishment (id + currency) from its slug, or null. */
 export async function fetchEstablishmentBySlug(slug: string): Promise<ManagerEstablishment | null> {
   if (!supabase) return null;

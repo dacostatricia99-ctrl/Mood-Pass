@@ -135,6 +135,7 @@ export type TranslationKey =
   | 'app.newEstablishment'
   | 'app.empty'
   | 'app.openDashboard'
+  | 'app.confirmDelete'
   | 'sub.required'
   | 'sub.expiredMsg'
   | 'sub.price'
@@ -290,6 +291,7 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'Nouvel établissement',
     'app.empty': 'Vous n\'avez pas encore d\'établissement.',
     'app.openDashboard': 'Tableau de bord',
+    'app.confirmDelete': 'Supprimer "{name}" et tout son menu ? Cette action est irréversible.',
     'sub.required': 'Abonnement requis',
     'sub.expiredMsg': 'Pour gérer votre établissement, abonnez-vous à Mood Pass.',
     'sub.price': '10 000 FCFA / mois',
@@ -440,6 +442,7 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'New establishment',
     'app.empty': 'You don\'t have any establishment yet.',
     'app.openDashboard': 'Dashboard',
+    'app.confirmDelete': 'Delete "{name}" and its whole menu? This cannot be undone.',
     'sub.required': 'Subscription required',
     'sub.expiredMsg': 'To manage your establishment, subscribe to Mood Pass.',
     'sub.price': '10,000 FCFA / month',
@@ -590,6 +593,7 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'منشأة جديدة',
     'app.empty': 'ليس لديك أي منشأة بعد.',
     'app.openDashboard': 'لوحة التحكم',
+    'app.confirmDelete': 'حذف "{name}" وكامل قائمته؟ لا يمكن التراجع عن هذا.',
     'sub.required': 'يلزم الاشتراك',
     'sub.expiredMsg': 'لإدارة منشأتك، اشترك في Mood Pass.',
     'sub.price': '10000 فرنك / شهر',
@@ -740,6 +744,7 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': 'Novo estabelecimento',
     'app.empty': 'Ainda não tem nenhum estabelecimento.',
     'app.openDashboard': 'Painel',
+    'app.confirmDelete': 'Eliminar "{name}" e todo o seu menu? Esta ação é irreversível.',
     'sub.required': 'Subscrição necessária',
     'sub.expiredMsg': 'Para gerir o seu estabelecimento, subscreva o Mood Pass.',
     'sub.price': '10 000 FCFA / mês',
@@ -890,6 +895,7 @@ export const translations: Record<Language, Dictionary> = {
     'app.newEstablishment': '新建店铺',
     'app.empty': '您还没有任何店铺。',
     'app.openDashboard': '管理面板',
+    'app.confirmDelete': '删除"{name}"及其整个菜单？此操作无法撤销。',
     'sub.required': '需要订阅',
     'sub.expiredMsg': '要管理您的店铺，请订阅 Mood Pass。',
     'sub.price': '10,000 FCFA / 月',
