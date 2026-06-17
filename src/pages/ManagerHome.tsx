@@ -9,8 +9,10 @@ import { fetchMyEstablishments, getSubscription, startSubscriptionPayment, delet
 export function ManagerHome() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { session, isConfigured, signOut } = useAuth();
+  const { session, isConfigured, signOut, updatePassword } = useAuth();
   const [establishments, setEstablishments] = useState<MyEstablishment[]>([]);
+  const [newPw, setNewPw] = useState('');
+  const [pwStatus, setPwStatus] = useState<'idle' | 'saving' | 'done'>('idle');
   const [subs, setSubs] = useState<Record<string, Subscription | null>>({});
   const [paying, setPaying] = useState<string | null>(null);
   const [loading, setLoading] = useState(isConfigured);
@@ -55,6 +57,19 @@ export function ManagerHome() {
       setEstablishments((prev) => prev.filter((x) => x.id !== e.id));
     } catch {
       /* ignore */
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPw.length < 6 || pwStatus === 'saving') return;
+    setPwStatus('saving');
+    const res = await updatePassword(newPw);
+    if (!res.error) {
+      setNewPw('');
+      setPwStatus('done');
+      setTimeout(() => setPwStatus('idle'), 2500);
+    } else {
+      setPwStatus('idle');
     }
   };
 
@@ -142,7 +157,28 @@ export function ManagerHome() {
             </div>
           ))
         )}
+
+        {/* Account — change password (works while logged in, no email needed) */}
+        {session && (
+          <div className="glass-panel" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            <h2 style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', margin: 0, color: 'var(--text-primary)' }}>{t('account.title')}</h2>
+            <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+              <input
+                type="password"
+                value={newPw}
+                onChange={(e) => setNewPw(e.target.value)}
+                placeholder={t('account.newPassword')}
+                autoComplete="new-password"
+                style={{ flex: 1, minWidth: 180, boxSizing: 'border-box', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-glass)', background: 'var(--bg-color)', color: 'var(--text-primary)', outline: 'none', fontSize: 'var(--font-sm)' }}
+              />
+              <button onClick={handleChangePassword} disabled={newPw.length < 6 || pwStatus === 'saving'} className="btn-primary" style={{ padding: '0 16px', opacity: newPw.length < 6 ? 0.5 : 1 }}>
+                {pwStatus === 'done' ? t('account.updated') : t('account.changePassword')}
+              </button>
+            </div>
+          </div>
+        )}
       </main>
+      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

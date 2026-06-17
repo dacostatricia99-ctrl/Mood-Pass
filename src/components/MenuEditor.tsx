@@ -94,7 +94,7 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
   const handleAddProduct = async (categoryId: string) => {
     const name = draft.name.trim();
     const price = parseFloat(draft.price);
-    if (!name || Number.isNaN(price)) return;
+    if (!name || Number.isNaN(price) || price < 0) return;
     const product = await createProduct({ establishmentId, categoryId, name, price, description: draft.description });
     setProducts((prev) => [...prev, product]);
     setDraft(emptyDraft);
@@ -109,7 +109,7 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
   const handleSaveEdit = async (id: string) => {
     const name = editDraft.name.trim();
     const price = parseFloat(editDraft.price);
-    if (!name || Number.isNaN(price)) return;
+    if (!name || Number.isNaN(price) || price < 0) return;
     await updateProduct(id, { name, price, description: editDraft.description });
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, name, price, description: editDraft.description } : p)));
     setEditingId(null);

@@ -10,17 +10,8 @@ import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProduct, localizeText } from '../i18n/menuData';
 import { fetchEstablishmentMenu } from '../lib/menuApi';
 import type { Category, Product } from '../types';
-import type { TranslationKey } from '../i18n/translations';
 
 const ALL_CATEGORY = 'all';
-
-const CAROUSEL_LABELS: TranslationKey[] = ['carousel.specials', 'carousel.new', 'carousel.deals'];
-
-const carouselImages = [
-  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600&h=300',
-  'https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&q=80&w=600&h=300',
-  'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&q=80&w=600&h=300',
-];
 
 export function EstablishmentHome() {
   const { slug } = useParams<{ slug: string }>();
@@ -57,6 +48,12 @@ export function EstablishmentHome() {
   const products = useMemo(
     () => rawProducts.map((p) => localizeProduct(p, language)),
     [rawProducts, language],
+  );
+
+  // Carousel shows the establishment's own dish photos (no generic stock images).
+  const carouselProducts = useMemo(
+    () => products.filter((p) => p.image_url).slice(0, 6),
+    [products],
   );
 
   // Only show categories that actually have products, plus the "All" tab.
@@ -112,28 +109,28 @@ export function EstablishmentHome() {
       {/* Main Content Area */}
       <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-color)', paddingBottom: '80px' }}>
         
-        {/* Animated Image Carousel */}
-        <div style={{ margin: 'var(--space-md) 0' }}>
-          <div className="scroll-container">
-            {carouselImages.map((src, idx) => (
-              <div key={idx} className="scroll-item" style={{ width: '85%', height: '160px', position: 'relative', background: 'var(--bg-surface)' }}>
-                <img
-                  src={src}
-                  alt="Delicious food"
-                  loading={idx === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  width={600}
-                  height={300}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
-                <div style={{ position: 'absolute', bottom: 'var(--space-sm)', left: 'var(--space-md)', color: 'white', fontWeight: 'bold', fontSize: 'var(--font-lg)' }}>
-                  {t(CAROUSEL_LABELS[idx])}
+        {/* Dish photo carousel — only when the establishment has product photos */}
+        {carouselProducts.length > 0 && (
+          <div style={{ margin: 'var(--space-md) 0' }}>
+            <div className="scroll-container">
+              {carouselProducts.map((p, idx) => (
+                <div key={p.id} className="scroll-item" style={{ width: '85%', height: '160px', position: 'relative', background: 'var(--bg-surface)' }}>
+                  <img
+                    src={p.image_url}
+                    alt={p.name}
+                    loading={idx === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
+                  <div style={{ position: 'absolute', bottom: 'var(--space-sm)', left: 'var(--space-md)', color: 'white', fontWeight: 'bold', fontSize: 'var(--font-lg)' }}>
+                    {p.name}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Categories horizontally scrollable */}
         <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--bg-color)', paddingTop: 'var(--space-sm)', paddingBottom: 'var(--space-sm)', borderBottom: 'var(--border-glass)' }}>

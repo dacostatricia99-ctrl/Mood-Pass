@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Clock, ChefHat, PackageCheck, XCircle, X } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { fetchOrderStatus, getLastOrder, clearLastOrder, type LastOrder, type TrackStatus } from '../lib/orderApi';
+import { playOrderChime } from '../lib/notifications';
 import type { TranslationKey } from '../i18n/translations';
 
 const STATUS: Record<TrackStatus, { key: TranslationKey; Icon: typeof Clock; color: string }> = {
@@ -28,9 +29,17 @@ export function OrderStatusBanner({ slug }: { slug?: string }) {
   useEffect(() => {
     if (!order) return;
     let active = true;
+    let prev: TrackStatus | null = null;
     const poll = async () => {
       const s = await fetchOrderStatus(order.id);
-      if (active && s) setStatus(s);
+      if (!active || !s) return;
+      // Alert the customer the moment the order becomes ready.
+      if (s === 'completed' && prev !== null && prev !== 'completed') {
+        playOrderChime();
+        try { navigator.vibrate?.(200); } catch { /* ignore */ }
+      }
+      prev = s;
+      setStatus(s);
     };
     poll();
     const iv = window.setInterval(poll, 8000);
