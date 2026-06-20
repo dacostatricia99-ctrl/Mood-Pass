@@ -172,7 +172,10 @@ export type TranslationKey =
   | 'auth.signOut'
   | 'auth.error'
   | 'auth.signUpSuccess'
-  | 'auth.notConfigured';
+  | 'auth.notConfigured'
+  | 'auth.forgot'
+  | 'auth.enterEmail'
+  | 'auth.resetSent';
 
 type Dictionary = Record<TranslationKey, string>;
 
@@ -330,6 +333,9 @@ export const translations: Record<Language, Dictionary> = {
     'auth.signOut': 'Déconnexion',
     'auth.error': 'E-mail ou mot de passe incorrect.',
     'auth.signUpSuccess': 'Compte créé ! Vérifiez vos e-mails pour confirmer.',
+    'auth.forgot': 'Mot de passe oublié ?',
+    'auth.enterEmail': 'Saisissez d\'abord votre email.',
+    'auth.resetSent': 'Email de réinitialisation envoyé. Vérifiez votre boîte.',
     'auth.notConfigured': "Le backend n'est pas configuré — mode démo actif.",
   },
   en: {
@@ -485,6 +491,9 @@ export const translations: Record<Language, Dictionary> = {
     'auth.signOut': 'Sign out',
     'auth.error': 'Incorrect email or password.',
     'auth.signUpSuccess': 'Account created! Check your email to confirm.',
+    'auth.forgot': 'Forgot password?',
+    'auth.enterEmail': 'Enter your email first.',
+    'auth.resetSent': 'Reset email sent. Check your inbox.',
     'auth.notConfigured': 'Backend is not configured — demo mode is active.',
   },
   ar: {
@@ -640,6 +649,9 @@ export const translations: Record<Language, Dictionary> = {
     'auth.signOut': 'تسجيل الخروج',
     'auth.error': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
     'auth.signUpSuccess': 'تم إنشاء الحساب! تحقق من بريدك الإلكتروني للتأكيد.',
+    'auth.forgot': 'هل نسيت كلمة المرور؟',
+    'auth.enterEmail': 'أدخل بريدك الإلكتروني أولاً.',
+    'auth.resetSent': 'تم إرسال بريد إعادة التعيين. تحقق من صندوقك.',
     'auth.notConfigured': 'لم يتم تكوين الخادم — الوضع التجريبي مفعّل.',
   },
   pt: {
@@ -795,6 +807,9 @@ export const translations: Record<Language, Dictionary> = {
     'auth.signOut': 'Terminar sessão',
     'auth.error': 'E-mail ou palavra-passe incorretos.',
     'auth.signUpSuccess': 'Conta criada! Verifique o seu e-mail para confirmar.',
+    'auth.forgot': 'Esqueceu a palavra-passe?',
+    'auth.enterEmail': 'Introduza primeiro o seu email.',
+    'auth.resetSent': 'Email de redefinição enviado. Verifique a caixa.',
     'auth.notConfigured': 'O backend não está configurado — modo de demonstração ativo.',
   },
   zh: {
@@ -950,6 +965,9 @@ export const translations: Record<Language, Dictionary> = {
     'auth.signOut': '退出登录',
     'auth.error': '邮箱或密码不正确。',
     'auth.signUpSuccess': '账户已创建！请查收邮件以确认。',
+    'auth.forgot': '忘记密码？',
+    'auth.enterEmail': '请先输入邮箱。',
+    'auth.resetSent': '重置邮件已发送，请查收。',
     'auth.notConfigured': '后端未配置 — 演示模式已启用。',
   },
 };

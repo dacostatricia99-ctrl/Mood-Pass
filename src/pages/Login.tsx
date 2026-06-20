@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
 
 export function Login() {
-  const { session, isConfigured, signIn, signUp } = useAuth();
+  const { session, isConfigured, signIn, signUp, resetPassword } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,6 +46,18 @@ export function Login() {
       return;
     }
     navigate(from, { replace: true });
+  };
+
+  const handleReset = async () => {
+    setError('');
+    setNotice('');
+    if (!email) {
+      setError(t('auth.enterEmail'));
+      return;
+    }
+    const res = await resetPassword(email);
+    if (res.error && res.error !== 'not-configured') setError(res.error);
+    else setNotice(t('auth.resetSent'));
   };
 
   const inputStyle = {
@@ -118,6 +130,15 @@ export function Login() {
         >
           {mode === 'signIn' ? t('auth.toSignUp') : t('auth.toSignIn')}
         </button>
+
+        {mode === 'signIn' && (
+          <button
+            onClick={handleReset}
+            style={{ marginTop: 'var(--space-sm)', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 'var(--font-sm)' }}
+          >
+            {t('auth.forgot')}
+          </button>
+        )}
       </div>
 
       <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
