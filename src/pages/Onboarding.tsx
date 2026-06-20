@@ -93,7 +93,7 @@ export function Onboarding() {
             }}
             onClick={() => fileInputRef.current?.click()}
           >
-            <input type="file" ref={fileInputRef} hidden accept="image/*" capture="environment" onChange={handleFileSelect} />
+            <input type="file" ref={fileInputRef} hidden accept="image/*,application/pdf" onChange={handleFileSelect} />
             <UploadCloud size={48} color="var(--primary-accent)" style={{ marginBottom: 'var(--space-md)' }} />
             <h3 style={{ fontSize: 'var(--font-lg)', marginBottom: 'var(--space-sm)' }}>
               {file ? file.name : t('onboarding.import')}

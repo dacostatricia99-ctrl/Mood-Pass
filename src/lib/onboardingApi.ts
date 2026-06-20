@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { pdfToImageBlobs } from './pdfToImages';
 
 export interface OnboardingResult {
   slug: string;
@@ -79,17 +80,27 @@ export async function generateMenuFromImage(params: { name: string; file: File }
     if (!establishmentId) throw new Error('Could not create establishment (slug unavailable)');
   }
 
-  // 2. Upload the menu image to the public "menus" bucket.
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const path = `${establishmentId}/${Date.now()}.${ext}`;
-  const { error: uploadError } = await supabase.storage.from('menus').upload(path, file, { upsert: true });
-  if (uploadError) throw uploadError;
+  // 2. Build the page image(s): a PDF is rasterised to one image per page,
+  //    an image is used as-is. OpenAI Vision only reads images.
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  const blobs: Blob[] = isPdf ? await pdfToImageBlobs(file) : [file];
+  if (blobs.length === 0) throw new Error('Could not read the menu file');
 
-  const { data: publicUrl } = supabase.storage.from('menus').getPublicUrl(path);
+  // 3. Upload each page and collect its public URL.
+  const imageUrls: string[] = [];
+  for (let i = 0; i < blobs.length; i++) {
+    const ext = isPdf ? 'jpg' : (file.name.split('.').pop()?.toLowerCase() || 'jpg');
+    const path = `${establishmentId}/${Date.now()}-${i}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from('menus')
+      .upload(path, blobs[i], { upsert: true, contentType: blobs[i].type || 'image/jpeg' });
+    if (uploadError) throw uploadError;
+    imageUrls.push(supabase.storage.from('menus').getPublicUrl(path).data.publicUrl);
+  }
 
-  // 3. Vision: extract, translate and persist the menu.
+  // 4. Vision: extract, translate and persist the menu (all pages at once).
   const { data: visionData, error: visionError } = await supabase.functions.invoke('mood-vision-onboarding', {
-    body: { image_url: publicUrl.publicUrl, establishment_id: establishmentId },
+    body: { image_urls: imageUrls, establishment_id: establishmentId },
   });
   if (visionError) throw visionError;
 

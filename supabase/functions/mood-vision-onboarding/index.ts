@@ -28,9 +28,14 @@ serve(async (req) => {
   try {
     // In a real app, the client uploads the image to Supabase Storage and passes
     // the public URL here. `establishment_id` enables persisting the menu.
-    const { image_url, establishment_id } = await req.json()
+    const body = await req.json()
+    const { establishment_id } = body
+    // Accept a single image_url (legacy) or an array of image_urls (PDF pages).
+    const images: string[] = Array.isArray(body.image_urls) && body.image_urls.length > 0
+      ? body.image_urls
+      : (body.image_url ? [body.image_url] : [])
 
-    if (!image_url) throw new Error('image_url is required')
+    if (images.length === 0) throw new Error('image_url(s) required')
 
     // 1. Vision: parse the image into structured JSON (canonical language).
     const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -48,7 +53,7 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `Tu es un OCR expert pour menus de restaurant. TRANSCRIS EXACTEMENT le menu de l'image, sans rien inventer.
+                text: `Tu es un OCR expert pour menus de restaurant. Les images fournies sont une ou plusieurs pages d'UN MÊME menu. TRANSCRIS EXACTEMENT tout le menu (toutes les pages), sans rien inventer.
 
 RÈGLES STRICTES :
 - Recopie CHAQUE produit visible, sans en omettre ni en ajouter. N'invente jamais un produit, un prix ou une description.
@@ -66,10 +71,10 @@ Renvoie STRICTEMENT ce JSON :
   ]
 }`
               },
-              {
+              ...images.map((url: string) => ({
                 type: 'image_url',
-                image_url: { url: image_url, detail: 'high' }
-              }
+                image_url: { url, detail: 'high' },
+              })),
             ]
           }
         ],
