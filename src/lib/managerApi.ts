@@ -247,6 +247,10 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   if (!supabase) return;
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
   if (error) throw error;
+  // When the order becomes ready, push a notification to the customer.
+  if (status === 'completed') {
+    supabase.functions.invoke('notify-order-ready', { body: { order_id: orderId } }).catch(() => {});
+  }
 }
 
 /** Marks an order as paid — used by the manager to confirm a cash payment. */

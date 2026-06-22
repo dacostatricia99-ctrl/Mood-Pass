@@ -4,6 +4,7 @@ import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, Pack
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
 import { createOrder, fetchOrderStatus, startMobilePayment, saveLastOrder, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
+import { subscribeOrderPush } from '../lib/push';
 import { formatPrice } from '../lib/format';
 
 type Status = 'idle' | 'placing' | 'error' | 'success';
@@ -80,6 +81,8 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
 
       if (order.source === 'remote' && slug) {
         saveLastOrder({ id: order.id, reference: order.reference, slug, ts: Date.now() });
+        // Ask to notify the customer when the order is ready (best-effort).
+        void subscribeOrderPush(order.id);
       }
       setReference(order.reference);
       setPlacedOrder(order);
