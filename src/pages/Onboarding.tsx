@@ -59,8 +59,9 @@ export function Onboarding() {
         await new Promise((resolve) => setTimeout(resolve, 4000));
         setResult({ slug: slugify(name || 'demo'), categoryCount: 3, productCount: 24 });
       }
-    } catch {
-      setError(t('onboarding.error'));
+    } catch (e) {
+      // Surface the real reason so PDF/vision failures are diagnosable.
+      setError(e instanceof Error && e.message ? e.message : t('onboarding.error'));
     } finally {
       setIsProcessing(false);
     }

@@ -22,9 +22,8 @@ export async function pdfToImageBlobs(file: File): Promise<Blob[]> {
     const canvas = document.createElement('canvas');
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) continue;
-    await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+    // pdf.js v6: pass the canvas; it grabs the 2D context itself.
+    await page.render({ canvas, viewport }).promise;
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
     if (blob) blobs.push(blob);
   }
