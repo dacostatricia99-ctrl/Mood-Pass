@@ -88,26 +88,31 @@ export function LandingPage() {
 
       {/* Hero */}
       <section style={{ background: 'radial-gradient(1200px 500px at 70% -10%, rgba(107,76,255,0.18), transparent), #14101f', color: 'white' }}>
-        <div style={{ ...sectionPad, paddingTop: 72, paddingBottom: 72 }}>
-          <h1 style={{ fontSize: 'clamp(36px, 6vw, 60px)', lineHeight: 1.05, fontWeight: 800, margin: 0, maxWidth: 760 }}>
-            Un scan.<br />Un accès.<br />Toutes vos <span style={{ color: '#a855f7' }}>envies.</span>
-          </h1>
-          <p style={{ color: '#c9c4dd', fontSize: 'clamp(15px,2.5vw,19px)', maxWidth: 560, marginTop: 22 }}>
-            Mood Pass transforme un simple QR Code en point d'accès intelligent à tous les services de votre établissement.
-          </p>
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 30 }}>
-            <Link to="/register" style={{ background: PURPLE, color: 'white', padding: '14px 26px', borderRadius: 999, fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 30px rgba(107,76,255,0.4)' }}>
-              Démarrer gratuitement
-            </Link>
-            <a href="#how" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '14px 26px', borderRadius: 999, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)' }}>
-              Voir comment ça marche
-            </a>
+        <div style={{ ...sectionPad, paddingTop: 64, paddingBottom: 64, display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 380px' }}>
+            <h1 style={{ fontSize: 'clamp(36px, 6vw, 58px)', lineHeight: 1.05, fontWeight: 800, margin: 0 }}>
+              Un scan.<br />Un accès.<br />Toutes vos <span style={{ color: '#a855f7' }}>envies.</span>
+            </h1>
+            <p style={{ color: '#c9c4dd', fontSize: 'clamp(15px,2.5vw,19px)', maxWidth: 540, marginTop: 22 }}>
+              Mood Pass transforme un simple QR Code en point d'accès intelligent à tous les services de votre établissement.
+            </p>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 30 }}>
+              <Link to="/register" style={{ background: PURPLE, color: 'white', padding: '14px 26px', borderRadius: 999, fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 30px rgba(107,76,255,0.4)' }}>
+                Démarrer gratuitement
+              </Link>
+              <a href="#how" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '14px 26px', borderRadius: 999, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)' }}>
+                Voir comment ça marche
+              </a>
+            </div>
+            <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', marginTop: 34, color: '#c9c4dd', fontSize: 14 }}>
+              {[[Zap, 'Sans application'], [Clock, 'Installation en 2 min'], [BrainCircuit, 'IA intégrée'], [Headphones, 'Multilingue']].map(([I, t], i) => {
+                const Ic = I as typeof Zap;
+                return <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Ic size={16} color="#a855f7" /> {t as string}</span>;
+              })}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', marginTop: 34, color: '#c9c4dd', fontSize: 14 }}>
-            {[[Zap, 'Sans application'], [Clock, 'Installation en 2 min'], [BrainCircuit, 'IA intégrée'], [Headphones, 'Multilingue']].map(([I, t], i) => {
-              const Ic = I as typeof Zap;
-              return <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Ic size={16} color="#a855f7" /> {t as string}</span>;
-            })}
+          <div style={{ flex: '1 1 360px', minWidth: 280 }}>
+            <img src="/landing/hero.jpg" alt="Mood Pass — QR de table et application" loading="eager" style={{ width: '100%', borderRadius: 18, boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }} />
           </div>
         </div>
       </section>
