@@ -74,10 +74,18 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 480px; /* Mobile first */
-  margin: 0 auto;
   position: relative;
   overflow-x: hidden;
+  background-color: var(--bg-color);
+}
+
+/* Phone-width frame for the customer & manager app screens (the marketing
+   landing and the wide dashboards opt out and use the full width). */
+.app-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
   background-color: var(--bg-color);
   box-shadow: var(--shadow-soft);
 }

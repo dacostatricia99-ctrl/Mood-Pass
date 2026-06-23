@@ -73,8 +73,8 @@ export function EstablishmentHome() {
   const activeTabLabel = tabs.find((tab) => tab.id === activeCategory)?.label ?? t('menu.title');
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
-      
+    <div className="animate-fade-in app-container" style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+
       {/* Header with Gradient and Language Selector */}
       <header className="app-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
