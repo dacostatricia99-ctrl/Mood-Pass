@@ -21,7 +21,7 @@ export function QRCodeModal({ slug, onClose }: QRCodeModalProps) {
       width: 300,
       margin: 2,
       color: {
-        dark: '#ef4444', // brand red
+        dark: '#6b4cff', // brand purple
         light: '#ffffff'
       }
     })

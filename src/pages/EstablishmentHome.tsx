@@ -79,7 +79,7 @@ export function EstablishmentHome() {
       <header className="app-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-card)' }}>
-            <img src="https://api.dicebear.com/7.x/initials/svg?seed=MP&backgroundColor=ef4444" alt="Logo" loading="lazy" decoding="async" width={40} height={40} style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-md)' }} />
+            <img src="https://api.dicebear.com/7.x/initials/svg?seed=MP&backgroundColor=6b4cff" alt="Logo" loading="lazy" decoding="async" width={40} height={40} style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-md)' }} />
           </div>
           <h1 style={{ lineHeight: 1.1 }}>
             {establishmentName}

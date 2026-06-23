@@ -8,23 +8,24 @@
   --text-secondary: #4b5563;
   --text-tertiary: #9ca3af;
   
-  /* Primary Restaurant Colors */
-  --primary-yellow: #f59e0b;
-  --primary-red: #ef4444;
-  --primary-accent: #ef4444; 
-  
-  --gradient-brand: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  /* Brand color = MoodPass purple (matches the logo & landing).
+     Red/amber kept only for danger (delete/error) and status (pending). */
+  --primary-yellow: #f59e0b; /* amber — status: pending / warning */
+  --primary-red: #ef4444;    /* red — danger: delete / error */
+  --primary-accent: #6b4cff; /* brand accent — purple */
+
+  --gradient-brand: linear-gradient(135deg, #6b4cff 0%, #a855f7 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
-  
+
   --border-glass: 1px solid #f3f4f6;
-  --border-focus: 1px solid rgba(239, 68, 68, 0.5);
+  --border-focus: 1px solid rgba(107, 76, 255, 0.5);
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  --shadow-glow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  --shadow-glow: 0 4px 15px rgba(107, 76, 255, 0.3);
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.06);
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.05);
 

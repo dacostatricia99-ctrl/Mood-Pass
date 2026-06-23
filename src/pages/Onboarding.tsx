@@ -24,7 +24,7 @@ export function Onboarding() {
   const menuUrl = result ? `${window.location.origin}/e/${result.slug}` : '';
   useEffect(() => {
     if (!menuUrl) return;
-    QRCode.toDataURL(menuUrl, { width: 512, margin: 2, color: { dark: '#ef4444', light: '#ffffff' } })
+    QRCode.toDataURL(menuUrl, { width: 512, margin: 2, color: { dark: '#6b4cff', light: '#ffffff' } })
       .then(setQrUrl)
       .catch(() => setQrUrl(''));
   }, [menuUrl]);
