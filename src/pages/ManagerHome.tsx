@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, LayoutDashboard, BarChart3, ChefHat, LogOut, Store, CreditCard, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import { fetchMyEstablishments, getSubscription, startSubscriptionPayment, deleteEstablishment, type MyEstablishment, type Subscription } from '../lib/managerApi';
 
@@ -90,9 +91,10 @@ export function ManagerHome() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)' }}>
-        <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <Store size={20} /> {t('app.title')}
-        </h1>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <BrandLogo size={20} />
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 42 }}>{t('app.title')}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           <LanguageSelect />
           {session && (
