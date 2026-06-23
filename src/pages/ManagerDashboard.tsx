@@ -4,6 +4,7 @@ import { Send, Bot, Package, LayoutDashboard, Settings, LogOut, QrCode, BellRing
 import { useTranslation } from '../i18n/LanguageContext';
 import { QRCodeModal } from '../components/QRCodeModal';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 import { OrdersList } from '../components/OrdersList';
 import { MenuEditor } from '../components/MenuEditor';
 import { useAuth } from '../lib/AuthContext';
@@ -123,7 +124,10 @@ export function ManagerDashboard() {
     <div className="app-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg-color)' }}>
       {/* Header */}
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)' }}>
-        <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>{t('manager.title')}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={18} />
+          <span style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>{t('manager.title')}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           {slug && (
             <a

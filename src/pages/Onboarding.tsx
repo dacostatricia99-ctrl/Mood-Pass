@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { UploadCloud, CheckCircle, Loader2, Download } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import { generateMenuFromImage, slugify, type OnboardingResult } from '../lib/onboardingApi';
 
@@ -72,7 +73,8 @@ export function Onboarding() {
   return (
     <div className="app-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg-color)', padding: 'var(--space-lg)' }}>
       <header style={{ marginBottom: 'var(--space-2xl)', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-md)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+          <BrandLogo size={20} />
           <LanguageSelect />
         </div>
         <h1 className="text-gradient" style={{ fontSize: 'var(--font-xl)', fontWeight: 'bold' }}>{t('onboarding.title')}</h1>

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Settings as SettingsIcon, Smartphone, Check, Loader2, Info, Store } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import { getEstablishmentSettings, updateEstablishment, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
 
@@ -78,9 +79,12 @@ export function SettingsPage() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)' }}>
-        <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <SettingsIcon size={20} /> {t('nav.settings')}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={18} />
+          <span style={{ fontSize: 'var(--font-md)', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <SettingsIcon size={16} /> {t('nav.settings')}
+          </span>
+        </div>
         <LanguageSelect />
       </header>
 

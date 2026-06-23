@@ -4,6 +4,7 @@ import { ChefHat, Check, CheckCheck, Clock, Printer } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeText } from '../i18n/menuData';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import {
   fetchEstablishmentBySlug,
@@ -123,10 +124,12 @@ export function KitchenDisplay() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)', position: 'sticky', top: 0, zIndex: 10 }}>
-        <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <ChefHat size={22} /> {t('kitchen.title')}
-          <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal', fontSize: 'var(--font-md)' }}>· {active.length}</span>
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={18} />
+          <span style={{ fontSize: 'var(--font-md)', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ChefHat size={16} /> {t('kitchen.title')} · {active.length}
+          </span>
+        </div>
         <LanguageSelect />
       </header>
 

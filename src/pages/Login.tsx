@@ -4,6 +4,7 @@ import { Loader2, LogIn } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 
 export function Login() {
   const { session, isConfigured, signIn, signUp, resetPassword } = useAuth();
@@ -79,6 +80,9 @@ export function Login() {
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 400, width: '100%', margin: '0 auto' }}>
         <header style={{ textAlign: 'center', marginBottom: 'var(--space-2xl)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-md)' }}>
+            <BrandLogo size={24} />
+          </div>
           <h1 className="text-gradient" style={{ fontSize: 'var(--font-xl)', fontWeight: 'bold' }}>{t('auth.title')}</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-sm)' }}>{t('auth.subtitle')}</p>
         </header>

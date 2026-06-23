@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ShieldCheck, Loader2, TrendingUp, Store, Clock, XCircle, ShoppingBag, Gift } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
+import { BrandLogo } from '../components/BrandLogo';
 import { formatPrice } from '../lib/format';
 import { fetchAdminOverview, adminGrant, type AdminOverview, type AdminRow } from '../lib/managerApi';
 
@@ -44,13 +45,11 @@ export function AdminDashboard() {
       {/* Distinct dark header so the platform admin is never confused with a
           restaurant's own (light) manager pages. */}
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0f172a', color: 'white', borderBottom: '3px solid var(--primary-accent)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: 'var(--primary-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-            <ShieldCheck size={22} />
-          </div>
-          <div style={{ lineHeight: 1.15 }}>
-            <div style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold' }}>Administration</div>
-            <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: '#94a3b8' }}>Mood Pass · Plateforme</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <BrandLogo size={18} light />
+          <div style={{ lineHeight: 1.15, borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 12 }}>
+            <div style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 6 }}><ShieldCheck size={16} /> Administration</div>
+            <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: '#94a3b8' }}>Plateforme</div>
           </div>
         </div>
         {session && (

@@ -5,6 +5,7 @@ import { useTranslation } from '../i18n/LanguageContext';
 import { localizeText } from '../i18n/menuData';
 import { formatPrice } from '../lib/format';
 import { LanguageSelect } from '../components/LanguageSelect';
+import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import { fetchEstablishmentBySlug, fetchOrders, type OrderView } from '../lib/managerApi';
 import type { LocalizedField } from '../types';
@@ -97,9 +98,12 @@ export function StatsView() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
       <header style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 'var(--border-glass)', background: 'var(--bg-surface)', position: 'sticky', top: 0, zIndex: 10 }}>
-        <h1 className="text-gradient" style={{ fontSize: 'var(--font-lg)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <BarChart3 size={22} /> {t('stats.title')}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <BrandLogo size={18} />
+          <span style={{ fontSize: 'var(--font-md)', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <BarChart3 size={16} /> {t('stats.title')}
+          </span>
+        </div>
         <LanguageSelect />
       </header>
 
