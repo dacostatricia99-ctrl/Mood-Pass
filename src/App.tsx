@@ -13,6 +13,7 @@ import { AuthProvider } from './lib/AuthContext';
 const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard').then((m) => ({ default: m.ManagerDashboard })));
 const ManagerHome = lazy(() => import('./pages/ManagerHome').then((m) => ({ default: m.ManagerHome })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const KitchenDisplay = lazy(() => import('./pages/KitchenDisplay').then((m) => ({ default: m.KitchenDisplay })));
 const StatsView = lazy(() => import('./pages/StatsView').then((m) => ({ default: m.StatsView })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
@@ -48,6 +49,8 @@ function App() {
           <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
           <Routes>
+            {/* Public marketing site */}
+            <Route path="/" element={<LandingPage />} />
             {/* Customer-facing: anonymous */}
             <Route path="/e/:slug" element={<EstablishmentHome />} />
             {/* Manager-facing: protected (open in demo mode) */}
