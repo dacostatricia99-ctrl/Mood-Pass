@@ -28,6 +28,7 @@ export interface Product {
   price: number;
   image_url?: string;
   is_available: boolean;
+  featured?: boolean;
 }
 
 export interface CartItem extends Product {

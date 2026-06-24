@@ -39,6 +39,7 @@ export type TranslationKey =
   | 'menu.edit'
   | 'menu.addProduct'
   | 'menu.save'
+  | 'menu.feature'
   | 'product.add'
   | 'qr.title'
   | 'qr.description'
@@ -83,8 +84,11 @@ export type TranslationKey =
   | 'settings.name'
   | 'settings.currency'
   | 'settings.phone'
+  | 'settings.logo'
+  | 'settings.logoHint'
   // App fallback
   | 'home.scanPrompt'
+  | 'home.featured'
   // Onboarding
   | 'onboarding.title'
   | 'onboarding.subtitle'
@@ -207,6 +211,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.edit': 'Modifier',
     'menu.addProduct': 'Ajouter un produit',
     'menu.save': 'Enregistrer',
+    'menu.feature': 'À la une',
     'product.add': 'Ajouter +',
     'qr.title': 'QR Code du Menu',
     'qr.description': 'Scannez pour voir le menu et commander.',
@@ -249,7 +254,10 @@ export const translations: Record<Language, Dictionary> = {
     'settings.name': 'Nom',
     'settings.currency': 'Devise',
     'settings.phone': 'Téléphone',
+    'settings.logo': 'Logo',
+    'settings.logoHint': 'Affiché sur votre page client',
     'home.scanPrompt': "Veuillez scanner le QR Code d'un établissement pour accéder à son menu.",
+    'home.featured': 'À la une',
     'onboarding.title': 'Créer votre Menu',
     'onboarding.subtitle': "Laissez l'IA faire le travail. Prenez votre menu en photo, nous nous occupons du reste.",
     'onboarding.namePlaceholder': "Nom de votre établissement",
@@ -365,6 +373,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.edit': 'Edit',
     'menu.addProduct': 'Add a product',
     'menu.save': 'Save',
+    'menu.feature': 'Featured',
     'product.add': 'Add +',
     'qr.title': 'Menu QR Code',
     'qr.description': 'Scan to view the menu and place orders.',
@@ -407,7 +416,10 @@ export const translations: Record<Language, Dictionary> = {
     'settings.name': 'Name',
     'settings.currency': 'Currency',
     'settings.phone': 'Phone',
+    'settings.logo': 'Logo',
+    'settings.logoHint': 'Shown on your customer page',
     'home.scanPrompt': "Please scan an establishment's QR code to access its menu.",
+    'home.featured': 'Featured',
     'onboarding.title': 'Create your Menu',
     'onboarding.subtitle': 'Let AI do the work. Take a photo of your menu and we handle the rest.',
     'onboarding.namePlaceholder': 'Your establishment name',
@@ -523,6 +535,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.edit': 'تعديل',
     'menu.addProduct': 'إضافة منتج',
     'menu.save': 'حفظ',
+    'menu.feature': 'مميّز',
     'product.add': 'أضف +',
     'qr.title': 'رمز QR للقائمة',
     'qr.description': 'امسح الرمز لعرض القائمة وطلب الطعام.',
@@ -565,7 +578,10 @@ export const translations: Record<Language, Dictionary> = {
     'settings.name': 'الاسم',
     'settings.currency': 'العملة',
     'settings.phone': 'الهاتف',
+    'settings.logo': 'الشعار',
+    'settings.logoHint': 'يظهر في صفحة عملائك',
     'home.scanPrompt': 'يرجى مسح رمز QR الخاص بالمنشأة للوصول إلى قائمتها.',
+    'home.featured': 'مميّز',
     'onboarding.title': 'أنشئ قائمتك',
     'onboarding.subtitle': 'دع الذكاء الاصطناعي يقوم بالعمل. التقط صورة لقائمتك وسنتولى الباقي.',
     'onboarding.namePlaceholder': 'اسم منشأتك',
@@ -681,6 +697,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.edit': 'Editar',
     'menu.addProduct': 'Adicionar produto',
     'menu.save': 'Guardar',
+    'menu.feature': 'Em destaque',
     'product.add': 'Adicionar +',
     'qr.title': 'Código QR do Menu',
     'qr.description': 'Leia o código para ver o menu e fazer pedidos.',
@@ -723,7 +740,10 @@ export const translations: Record<Language, Dictionary> = {
     'settings.name': 'Nome',
     'settings.currency': 'Moeda',
     'settings.phone': 'Telefone',
+    'settings.logo': 'Logótipo',
+    'settings.logoHint': 'Apresentado na sua página de cliente',
     'home.scanPrompt': 'Leia o código QR de um estabelecimento para aceder ao seu menu.',
+    'home.featured': 'Em destaque',
     'onboarding.title': 'Criar o seu Menu',
     'onboarding.subtitle': 'Deixe a IA fazer o trabalho. Tire uma foto do seu menu e nós tratamos do resto.',
     'onboarding.namePlaceholder': 'Nome do seu estabelecimento',
@@ -839,6 +859,7 @@ export const translations: Record<Language, Dictionary> = {
     'menu.edit': '编辑',
     'menu.addProduct': '添加产品',
     'menu.save': '保存',
+    'menu.feature': '推荐',
     'product.add': '添加 +',
     'qr.title': '菜单二维码',
     'qr.description': '扫描以查看菜单并下单。',
@@ -881,7 +902,10 @@ export const translations: Record<Language, Dictionary> = {
     'settings.name': '名称',
     'settings.currency': '货币',
     'settings.phone': '电话',
+    'settings.logo': '标志',
+    'settings.logoHint': '显示在您的顾客页面',
     'home.scanPrompt': '请扫描商家的二维码以查看其菜单。',
+    'home.featured': '推荐',
     'onboarding.title': '创建您的菜单',
     'onboarding.subtitle': '让 AI 来完成工作。拍下您的菜单照片，其余的交给我们。',
     'onboarding.namePlaceholder': '您的店铺名称',

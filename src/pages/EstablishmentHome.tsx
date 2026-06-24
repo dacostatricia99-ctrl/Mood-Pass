@@ -9,6 +9,7 @@ import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProduct, localizeText } from '../i18n/menuData';
 import { fetchEstablishmentMenu } from '../lib/menuApi';
+import { foodEmoji } from '../lib/foodEmoji';
 import type { Category, Product } from '../types';
 
 const ALL_CATEGORY = 'all';
@@ -24,6 +25,7 @@ export function EstablishmentHome() {
   const [currency, setCurrency] = useState('FCFA');
   const [mobileMoneyEnabled, setMobileMoneyEnabled] = useState(false);
   const [name, setName] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   const totalItems = getTotalItems();
   const slugName = slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'MoodPass';
@@ -31,9 +33,10 @@ export function EstablishmentHome() {
 
   useEffect(() => {
     let active = true;
-    fetchEstablishmentMenu(slug).then(({ name, products, categories, currency, mobileMoneyEnabled }) => {
+    fetchEstablishmentMenu(slug).then(({ name, logoUrl, products, categories, currency, mobileMoneyEnabled }) => {
       if (!active) return;
       setName(name);
+      setLogoUrl(logoUrl);
       setRawProducts(products);
       setCategories(categories);
       setCurrency(currency);
@@ -50,9 +53,9 @@ export function EstablishmentHome() {
     [rawProducts, language],
   );
 
-  // Carousel shows the establishment's own dish photos (no generic stock images).
+  // Carousel = the items the manager flagged "à la une" (featured).
   const carouselProducts = useMemo(
-    () => products.filter((p) => p.image_url).slice(0, 6),
+    () => products.filter((p) => p.featured).slice(0, 8),
     [products],
   );
 
@@ -79,7 +82,7 @@ export function EstablishmentHome() {
       <header className="app-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-card)' }}>
-            <img src="https://api.dicebear.com/7.x/initials/svg?seed=MP&backgroundColor=6b4cff" alt="Logo" loading="lazy" decoding="async" width={40} height={40} style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-md)' }} />
+            <img src={logoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(establishmentName)}&backgroundColor=6b4cff`} alt={establishmentName} loading="lazy" decoding="async" width={40} height={40} style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
           </div>
           <h1 style={{ lineHeight: 1.1 }}>
             {establishmentName}
@@ -114,15 +117,20 @@ export function EstablishmentHome() {
           <div style={{ margin: 'var(--space-md) 0' }}>
             <div className="scroll-container">
               {carouselProducts.map((p, idx) => (
-                <div key={p.id} className="scroll-item" style={{ width: '85%', height: '160px', position: 'relative', background: 'var(--bg-surface)' }}>
-                  <img
-                    src={p.image_url}
-                    alt={p.name}
-                    loading={idx === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+                <div key={p.id} className="scroll-item" style={{ width: '85%', height: '160px', position: 'relative', background: p.image_url ? 'var(--bg-surface)' : 'var(--gradient-brand)' }}>
+                  {p.image_url ? (
+                    <img
+                      src={p.image_url}
+                      alt={p.name}
+                      loading={idx === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 56 }}>{foodEmoji(p.name, p.description)}</div>
+                  )}
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
+                  <div style={{ position: 'absolute', top: 'var(--space-sm)', left: 'var(--space-md)', color: 'white', fontSize: 11, fontWeight: 700, background: 'rgba(0,0,0,0.35)', padding: '3px 10px', borderRadius: 999 }}>★ {t('home.featured')}</div>
                   <div style={{ position: 'absolute', bottom: 'var(--space-sm)', left: 'var(--space-md)', color: 'white', fontWeight: 'bold', fontSize: 'var(--font-lg)' }}>
                     {p.name}
                   </div>

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Settings as SettingsIcon, Smartphone, Check, Loader2, Info, Store } from 'lucide-react';
+import { Settings as SettingsIcon, Smartphone, Check, Loader2, Info, Store, ImagePlus } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
-import { getEstablishmentSettings, updateEstablishment, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
+import { getEstablishmentSettings, updateEstablishment, uploadEstablishmentLogo, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
 
 const EMPTY: PaymentConfig = { siteId: '', apiKey: '', sandbox: true, enabled: false };
 
@@ -15,6 +15,9 @@ export function SettingsPage() {
   const { isConfigured } = useAuth();
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
   const [details, setDetails] = useState({ name: '', currency: 'FCFA', phone: '' });
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [savedDetails, setSavedDetails] = useState(false);
   const [savingDetails, setSavingDetails] = useState(false);
   const [cfg, setCfg] = useState<PaymentConfig>(EMPTY);
@@ -32,6 +35,7 @@ export function SettingsPage() {
       if (!active || !est) return;
       setEstablishmentId(est.id);
       setDetails({ name: est.name, currency: est.currency, phone: est.phone ?? '' });
+      setLogoUrl(est.logoUrl);
       const existing = await getPaymentConfig(est.id);
       if (active && existing) setCfg(existing);
       if (active) setLoading(false);
@@ -40,6 +44,21 @@ export function SettingsPage() {
       active = false;
     };
   }, [slug, isConfigured]);
+
+  const handleLogoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !establishmentId) return;
+    setUploadingLogo(true);
+    try {
+      const url = await uploadEstablishmentLogo(establishmentId, file);
+      setLogoUrl(url);
+    } catch {
+      /* ignore */
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const handleSaveDetails = async () => {
     if (!establishmentId || savingDetails) return;
@@ -102,6 +121,27 @@ export function SettingsPage() {
             <h2 style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)' }}>
               <Store size={18} color="var(--primary-accent)" /> {t('settings.details')}
             </h2>
+
+            {/* Logo */}
+            <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={handleLogoSelect} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+              <button
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploadingLogo}
+                title={t('settings.logo')}
+                style={{ position: 'relative', width: 64, height: 64, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, padding: 0, border: '1px solid var(--border-glass)', cursor: 'pointer', background: logoUrl ? '#eee' : 'var(--bg-color)' }}
+              >
+                {logoUrl
+                  ? <img src={logoUrl} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: 'var(--text-secondary)' }}><ImagePlus size={24} /></span>}
+                {uploadingLogo && <span style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /></span>}
+              </button>
+              <div>
+                <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t('settings.logo')}</div>
+                <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>{t('settings.logoHint')}</div>
+              </div>
+            </div>
+
             <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
               {t('settings.name')}
               <input value={details.name} onChange={(e) => setDetails({ ...details, name: e.target.value })} style={{ ...field, marginTop: 4 }} />

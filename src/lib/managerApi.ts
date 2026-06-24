@@ -133,6 +133,7 @@ export interface EstablishmentSettings {
   name: string;
   currency: string;
   phone: string | null;
+  logoUrl: string | null;
 }
 
 /** Loads editable establishment details from its slug (owner-facing). */
@@ -140,7 +141,7 @@ export async function getEstablishmentSettings(slug: string): Promise<Establishm
   if (!supabase) return null;
   const { data, error } = await supabase
     .from('establishments')
-    .select('id, name, currency, phone')
+    .select('id, name, currency, phone, logo_url')
     .eq('slug', slug)
     .maybeSingle();
   if (error || !data) return null;
@@ -149,6 +150,7 @@ export async function getEstablishmentSettings(slug: string): Promise<Establishm
     name: (data.name as string) ?? '',
     currency: (data.currency as string) ?? 'FCFA',
     phone: (data.phone as string) ?? null,
+    logoUrl: (data.logo_url as string) ?? null,
   };
 }
 
@@ -350,7 +352,7 @@ export async function fetchMenu(establishmentId: string): Promise<MenuData> {
       .order('display_order', { ascending: true }),
     supabase
       .from('products')
-      .select('id, establishment_id, category_id, name, description, name_i18n, description_i18n, price, image_url, is_available')
+      .select('id, establishment_id, category_id, name, description, name_i18n, description_i18n, price, image_url, is_available, featured')
       .eq('establishment_id', establishmentId)
       .order('created_at', { ascending: true }),
   ]);
@@ -431,6 +433,26 @@ export async function setProductAvailability(productId: string, isAvailable: boo
   if (!supabase) return;
   const { error } = await supabase.from('products').update({ is_available: isAvailable }).eq('id', productId);
   if (error) throw error;
+}
+
+/** Toggles whether a product is highlighted ("à la une") on the customer page. */
+export async function setProductFeatured(productId: string, featured: boolean): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from('products').update({ featured }).eq('id', productId);
+  if (error) throw error;
+}
+
+/** Uploads the establishment's logo and stores its URL. Returns the public URL. */
+export async function uploadEstablishmentLogo(establishmentId: string, file: File): Promise<string> {
+  if (!supabase) throw new Error('Supabase is not configured');
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+  const path = `logos/${establishmentId}-${Date.now()}.${ext}`;
+  const { error: upErr } = await supabase.storage.from('menus').upload(path, file, { upsert: false, contentType: file.type || 'image/png' });
+  if (upErr) throw upErr;
+  const url = supabase.storage.from('menus').getPublicUrl(path).data.publicUrl;
+  const { error } = await supabase.from('establishments').update({ logo_url: url }).eq('id', establishmentId);
+  if (error) throw error;
+  return url;
 }
 
 /** Deletes a product. */

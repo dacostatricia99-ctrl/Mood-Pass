@@ -4,6 +4,7 @@ import { mockCategories, mockProducts } from '../i18n/menuData';
 
 export interface EstablishmentMenu {
   name: string | null;
+  logoUrl: string | null;
   categories: Category[];
   products: Product[];
   currency: string;
@@ -13,6 +14,7 @@ export interface EstablishmentMenu {
 
 const MOCK_MENU: EstablishmentMenu = {
   name: null,
+  logoUrl: null,
   categories: mockCategories,
   products: mockProducts,
   currency: 'FCFA',
@@ -35,7 +37,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
   // 1. Resolve the establishment from its slug.
   const { data: establishment, error: estError } = await supabase
     .from('establishments')
-    .select('id, name, currency, mobile_money_enabled')
+    .select('id, name, currency, mobile_money_enabled, logo_url')
     .eq('slug', slug)
     .maybeSingle();
 
@@ -52,7 +54,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
       .order('display_order', { ascending: true }),
     supabase
       .from('products')
-      .select('id, establishment_id, category_id, name, description, name_i18n, description_i18n, price, image_url, is_available')
+      .select('id, establishment_id, category_id, name, description, name_i18n, description_i18n, price, image_url, is_available, featured')
       .eq('establishment_id', establishment.id)
       .eq('is_available', true)
       .order('created_at', { ascending: true }),
@@ -65,6 +67,7 @@ export async function fetchEstablishmentMenu(slug: string | undefined): Promise<
 
   return {
     name: ((establishment as { name?: string }).name) ?? null,
+    logoUrl: ((establishment as { logo_url?: string }).logo_url) ?? null,
     categories: (categoriesResult.data as Category[]) ?? [],
     products: products as Product[],
     currency: (establishment.currency as string) ?? 'FCFA',

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Trash2, Check, X, Pencil, Eye, EyeOff, Package, ImagePlus, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Check, X, Pencil, Eye, EyeOff, Package, ImagePlus, Loader2, Star } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { formatPrice } from '../lib/format';
 import type { Category, Product } from '../types';
@@ -10,6 +10,7 @@ import {
   createProduct,
   updateProduct,
   setProductAvailability,
+  setProductFeatured,
   deleteProduct,
   uploadProductImage,
 } from '../lib/managerApi';
@@ -119,6 +120,12 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
     const next = !p.is_available;
     await setProductAvailability(p.id, next);
     setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, is_available: next } : x)));
+  };
+
+  const handleToggleFeatured = async (p: Product) => {
+    const next = !p.featured;
+    await setProductFeatured(p.id, next);
+    setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, featured: next } : x)));
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -256,6 +263,9 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
                         <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                           <button onClick={() => handleToggle(p)} title={p.is_available ? t('menu.available') : t('menu.unavailable')} style={{ ...iconBtn, width: 28, height: 28, background: p.is_available ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-surface)', color: p.is_available ? '#10b981' : 'var(--text-secondary)', border: 'none' }}>
                             {p.is_available ? <Eye size={14} /> : <EyeOff size={14} />}
+                          </button>
+                          <button onClick={() => handleToggleFeatured(p)} title={t('menu.feature')} style={{ ...iconBtn, width: 28, height: 28, background: p.featured ? 'rgba(245,158,11,0.12)' : 'var(--bg-surface)', color: p.featured ? '#f59e0b' : 'var(--text-secondary)', border: 'none' }}>
+                            <Star size={14} fill={p.featured ? '#f59e0b' : 'none'} />
                           </button>
                           <button onClick={() => startEdit(p)} title={t('menu.edit')} style={{ ...iconBtn, width: 28, height: 28, border: 'none' }}><Pencil size={14} /></button>
                           <button onClick={() => handleDeleteProduct(p.id)} title={t('menu.delete')} style={{ ...iconBtn, width: 28, height: 28, color: 'var(--primary-red)', border: 'none' }}><Trash2 size={14} /></button>
