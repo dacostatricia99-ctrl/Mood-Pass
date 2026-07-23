@@ -3,7 +3,7 @@ import { useCartStore } from '../store/cartStore';
 import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle, Wallet, Smartphone } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
-import { createOrder, fetchOrderStatus, startMobilePayment, saveLastOrder, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
+import { createOrder, fetchOrderStatus, startMobilePayment, saveLastOrder, savePendingPayment, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
 import { subscribeOrderPush } from '../lib/push';
 import { formatPrice } from '../lib/format';
 
@@ -74,6 +74,13 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
       if (paymentMethod === 'mobile_money' && order.source === 'remote') {
         const res = await startMobilePayment(order.id, establishmentId);
         if (res.paymentUrl) {
+          // Remember the order across the redirect so that, on return, the app
+          // can verify the payment itself (no dependency on a shared callback).
+          if (slug) {
+            savePendingPayment({ id: order.id, reference: order.reference, slug, ts: Date.now() });
+            saveLastOrder({ id: order.id, reference: order.reference, slug, ts: Date.now() });
+            void subscribeOrderPush(order.id);
+          }
           window.location.href = res.paymentUrl;
           return; // leaving the app for the provider's checkout
         }

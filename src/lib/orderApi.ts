@@ -10,7 +10,7 @@ export interface PlacedOrder {
 
 /**
  * Kicks off a mobile-money payment for an order via the create-payment edge
- * function (which uses the restaurant's own CinetPay keys). Returns a redirect
+ * function (which uses the restaurant's own PawaPay token). Returns a redirect
  * URL for the real flow, or { simulated } in sandbox mode.
  */
 export async function startMobilePayment(
@@ -23,6 +23,62 @@ export async function startMobilePayment(
   });
   if (error) return { error: error.message };
   return { paymentUrl: data?.payment_url, simulated: Boolean(data?.simulated || data?.paid) };
+}
+
+/**
+ * Checks whether an order's mobile-money payment has gone through, by asking the
+ * verify-payment edge function to re-verify the deposit with PawaPay. Used on
+ * return from the provider (and while polling) so we never depend on the shared
+ * provider callback. Returns { paid, failed }.
+ */
+export async function verifyPayment(orderId: string): Promise<{ paid: boolean; failed?: boolean }> {
+  if (!supabase || !UUID_RE.test(orderId)) return { paid: false };
+  const { data, error } = await supabase.functions.invoke('verify-payment', {
+    body: { order_id: orderId },
+  });
+  if (error) return { paid: false };
+  return { paid: Boolean(data?.paid), failed: Boolean(data?.failed) };
+}
+
+// --- Pending mobile-money payment (survives the redirect to the provider) ----
+
+export interface PendingPayment {
+  id: string;
+  reference: string;
+  slug: string;
+  ts: number;
+}
+
+const PENDING_PAY_KEY = 'moodpass.pendingPay';
+// A payment attempt is only worth watching for a few minutes after the redirect.
+const PENDING_PAY_TTL_MS = 15 * 60 * 1000;
+
+export function savePendingPayment(p: PendingPayment): void {
+  try {
+    localStorage.setItem(PENDING_PAY_KEY, JSON.stringify(p));
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
+
+export function getPendingPayment(slug: string): PendingPayment | null {
+  try {
+    const raw = localStorage.getItem(PENDING_PAY_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as PendingPayment;
+    if (p.slug !== slug || Date.now() - p.ts > PENDING_PAY_TTL_MS) return null;
+    return p;
+  } catch {
+    return null;
+  }
+}
+
+export function clearPendingPayment(): void {
+  try {
+    localStorage.removeItem(PENDING_PAY_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 export type TrackStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';

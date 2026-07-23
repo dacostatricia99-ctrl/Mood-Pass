@@ -4,6 +4,7 @@ import { ShoppingCart } from 'lucide-react';
 import { ProductList } from '../components/ProductList';
 import { CartDrawer } from '../components/CartDrawer';
 import { OrderStatusBanner } from '../components/OrderStatusBanner';
+import { PaymentReturnWatcher } from '../components/PaymentReturnWatcher';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -177,6 +178,7 @@ export function EstablishmentHome() {
       </main>
 
       {/* Overlays */}
+      <PaymentReturnWatcher slug={slug} />
       <OrderStatusBanner slug={slug} />
       <CartDrawer currency={currency} mobileMoneyEnabled={mobileMoneyEnabled} slug={slug} />
     </div>

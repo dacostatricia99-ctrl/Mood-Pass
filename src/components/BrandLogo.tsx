@@ -9,7 +9,7 @@ export function BrandLogo({ size = 20, light = false }: { size?: number; light?:
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
       <img
-        src="/logo-mark.png"
+        src="/logo-mark.svg"
         alt=""
         aria-hidden="true"
         width={mark}

@@ -12,7 +12,7 @@ const PURPLE = 'linear-gradient(135deg, #6b4cff 0%, #a855f7 100%)';
 function Logo({ light = false }: { light?: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-      <img src="/logo-mark.png" alt="" aria-hidden="true" width={36} height={36} style={{ display: 'block', objectFit: 'contain' }} />
+      <img src="/logo-mark.svg" alt="" aria-hidden="true" width={36} height={36} style={{ display: 'block', objectFit: 'contain' }} />
       <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '0.4px', color: light ? 'white' : '#1e1b2e' }}>
         MOOD <span style={{ color: light ? '#d6ccff' : ACCENT }}>PASS</span>
       </span>

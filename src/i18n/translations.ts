@@ -76,6 +76,9 @@ export type TranslationKey =
   | 'pay.siteId'
   | 'pay.apiKey'
   | 'pay.country'
+  | 'pay.verifying'
+  | 'pay.confirmed'
+  | 'pay.failedMsg'
   | 'pay.sandbox'
   | 'pay.enable'
   | 'pay.sandboxNote'
@@ -247,6 +250,9 @@ export const translations: Record<Language, Dictionary> = {
     'pay.siteId': 'Site ID',
     'pay.apiKey': 'Jeton API PawaPay',
     'pay.country': 'Pays',
+    'pay.verifying': 'Vérification du paiement…',
+    'pay.confirmed': 'Paiement confirmé',
+    'pay.failedMsg': "Le paiement n'a pas abouti",
     'pay.sandbox': 'Mode test (sandbox)',
     'pay.enable': 'Activer le paiement mobile',
     'pay.sandboxNote': 'En mode test, les paiements sont simulés (aucun argent réel n\'est débité).',
@@ -410,6 +416,9 @@ export const translations: Record<Language, Dictionary> = {
     'pay.siteId': 'Site ID',
     'pay.apiKey': 'PawaPay API token',
     'pay.country': 'Country',
+    'pay.verifying': 'Checking payment…',
+    'pay.confirmed': 'Payment confirmed',
+    'pay.failedMsg': "Payment didn't go through",
     'pay.sandbox': 'Test mode (sandbox)',
     'pay.enable': 'Enable mobile payment',
     'pay.sandboxNote': 'In test mode, payments are simulated (no real money is charged).',
@@ -573,6 +582,9 @@ export const translations: Record<Language, Dictionary> = {
     'pay.siteId': 'معرّف الموقع',
     'pay.apiKey': 'رمز PawaPay API',
     'pay.country': 'البلد',
+    'pay.verifying': 'جارٍ التحقق من الدفع…',
+    'pay.confirmed': 'تم تأكيد الدفع',
+    'pay.failedMsg': 'لم تتم عملية الدفع',
     'pay.sandbox': 'وضع الاختبار',
     'pay.enable': 'تفعيل الدفع عبر الهاتف',
     'pay.sandboxNote': 'في وضع الاختبار، تكون المدفوعات محاكاة (لا يتم خصم أموال حقيقية).',
@@ -736,6 +748,9 @@ export const translations: Record<Language, Dictionary> = {
     'pay.siteId': 'Site ID',
     'pay.apiKey': 'Token da API PawaPay',
     'pay.country': 'País',
+    'pay.verifying': 'A verificar o pagamento…',
+    'pay.confirmed': 'Pagamento confirmado',
+    'pay.failedMsg': 'O pagamento não foi concluído',
     'pay.sandbox': 'Modo de teste (sandbox)',
     'pay.enable': 'Ativar pagamento móvel',
     'pay.sandboxNote': 'No modo de teste, os pagamentos são simulados (nenhum dinheiro real é cobrado).',
@@ -899,6 +914,9 @@ export const translations: Record<Language, Dictionary> = {
     'pay.siteId': '站点 ID',
     'pay.apiKey': 'PawaPay API 令牌',
     'pay.country': '国家/地区',
+    'pay.verifying': '正在核对支付…',
+    'pay.confirmed': '支付已确认',
+    'pay.failedMsg': '支付未完成',
     'pay.sandbox': '测试模式（沙盒）',
     'pay.enable': '启用移动支付',
     'pay.sandboxNote': '在测试模式下，支付为模拟操作（不会扣除真实款项）。',
