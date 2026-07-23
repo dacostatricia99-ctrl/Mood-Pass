@@ -2,11 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 // Creates a mobile-money payment for an order using the establishment's OWN
-// CinetPay credentials (Model A — funds go straight to the restaurant).
+// PawaPay token (Model A — funds go straight to the restaurant).
 //
-// Sandbox mode (or missing real keys): the payment is simulated server-side —
-// the order is marked paid and we return { simulated: true } so the whole flow
-// is testable before the restaurant has a live CinetPay account.
+// With no token configured the payment is simulated server-side (order marked
+// paid, { simulated: true }) so the whole flow is testable before the
+// restaurant has a live PawaPay account.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -47,10 +47,9 @@ serve(async (req) => {
 
     if (!cfg || !cfg.enabled) throw new Error('Mobile payment not enabled for this establishment')
 
-    const hasRealKeys = Boolean(cfg.site_id && cfg.api_key)
-
-    // --- Sandbox / simulation path -----------------------------------------
-    if (cfg.sandbox || !hasRealKeys) {
+    // --- Sandbox simulation (no token configured yet) ----------------------
+    // Lets the whole flow be tested before the restaurant has PawaPay keys.
+    if (!cfg.api_key) {
       await admin
         .from('orders')
         .update({ payment_status: 'paid', payment_ref: `SIMULATED-${Date.now()}` })
@@ -58,33 +57,32 @@ serve(async (req) => {
       return json({ simulated: true, paid: true })
     }
 
-    // --- Real CinetPay path -------------------------------------------------
-    // XOF amounts must be a multiple of 5.
-    const amount = Math.round(Number(order.total_amount) / 5) * 5
-    const notifyUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/payment-webhook`
+    // --- PawaPay Payment Page ----------------------------------------------
+    // depositId is a fresh UUID stored on the order so the callback can map back.
+    const depositId = crypto.randomUUID()
+    const base = cfg.sandbox ? 'https://api.sandbox.pawapay.io' : 'https://api.pawapay.io'
+    // FCFA is XOF (no decimals).
+    const amount = String(Math.round(Number(order.total_amount)))
 
-    const cpRes = await fetch('https://api-checkout.cinetpay.com/v2/payment', {
+    const ppRes = await fetch(`${base}/v2/paymentpage`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.api_key}` },
       body: JSON.stringify({
-        apikey: cfg.api_key,
-        site_id: cfg.site_id,
-        transaction_id: String(order_id),
-        amount,
-        currency: 'XOF',
-        description: `Commande ${String(order_id).slice(0, 8)}`,
-        notify_url: notifyUrl,
-        return_url: return_url ?? notifyUrl,
-        channels: 'ALL',
+        depositId,
+        returnUrl: return_url ?? Deno.env.get('SUPABASE_URL'),
+        amountDetails: { amount, currency: 'XOF' },
+        reason: `Commande ${String(order_id).slice(0, 8)}`,
+        metadata: [{ orderId: String(order_id) }],
       }),
     })
-    const cpData = await cpRes.json()
-    if (cpData?.code !== '201' || !cpData?.data?.payment_url) {
-      throw new Error(cpData?.description || cpData?.message || 'CinetPay init failed')
+    const pp = await ppRes.json()
+    if (!ppRes.ok || !pp?.redirectUrl) {
+      throw new Error(pp?.failureReason?.failureMessage || pp?.message || 'PawaPay init failed')
     }
 
-    await admin.from('orders').update({ payment_ref: String(order_id) }).eq('id', order_id)
-    return json({ payment_url: cpData.data.payment_url })
+    // Remember the depositId + mark the order pending until the callback confirms.
+    await admin.from('orders').update({ payment_ref: depositId, payment_status: 'pending' }).eq('id', order_id)
+    return json({ payment_url: pp.redirectUrl })
   } catch (error) {
     return json({ error: error.message }, 400)
   }

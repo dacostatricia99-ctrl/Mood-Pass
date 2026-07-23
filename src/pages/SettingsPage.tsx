@@ -167,12 +167,8 @@ export function SettingsPage() {
             <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', margin: 0 }}>{t('pay.mmHint')}</p>
 
             <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
-              {t('pay.siteId')}
-              <input value={cfg.siteId} onChange={(e) => setCfg({ ...cfg, siteId: e.target.value })} placeholder="CinetPay site_id" style={{ ...field, marginTop: 4 }} />
-            </label>
-            <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
               {t('pay.apiKey')}
-              <input value={cfg.apiKey} onChange={(e) => setCfg({ ...cfg, apiKey: e.target.value })} placeholder="CinetPay API key" type="password" style={{ ...field, marginTop: 4 }} />
+              <input value={cfg.apiKey} onChange={(e) => setCfg({ ...cfg, apiKey: e.target.value })} placeholder="PawaPay API token" type="password" style={{ ...field, marginTop: 4 }} />
             </label>
 
             <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', cursor: 'pointer', fontSize: 'var(--font-sm)', color: 'var(--text-primary)' }}>
