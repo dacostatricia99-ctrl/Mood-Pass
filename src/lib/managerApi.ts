@@ -265,6 +265,7 @@ export async function setOrderPaid(orderId: string): Promise<void> {
 export interface PaymentConfig {
   siteId: string;
   apiKey: string;
+  country: string;
   sandbox: boolean;
   enabled: boolean;
 }
@@ -274,20 +275,21 @@ export async function getPaymentConfig(establishmentId: string): Promise<Payment
   if (!supabase) return null;
   const { data, error } = await supabase
     .from('payment_configs')
-    .select('site_id, api_key, sandbox, enabled')
+    .select('site_id, api_key, country, sandbox, enabled')
     .eq('establishment_id', establishmentId)
     .maybeSingle();
   if (error || !data) return null;
   return {
     siteId: (data.site_id as string) ?? '',
     apiKey: (data.api_key as string) ?? '',
+    country: (data.country as string) ?? '',
     sandbox: Boolean(data.sandbox),
     enabled: Boolean(data.enabled),
   };
 }
 
 /**
- * Upserts the CinetPay config and mirrors `enabled` onto the public
+ * Upserts the PawaPay config and mirrors `enabled` onto the public
  * establishments.mobile_money_enabled flag (so the customer checkout can show
  * the option without ever reading the secret config).
  */
@@ -295,9 +297,10 @@ export async function savePaymentConfig(establishmentId: string, cfg: PaymentCon
   if (!supabase) return;
   const { error } = await supabase.from('payment_configs').upsert({
     establishment_id: establishmentId,
-    provider: 'cinetpay',
+    provider: 'pawapay',
     site_id: cfg.siteId.trim() || null,
     api_key: cfg.apiKey.trim() || null,
+    country: cfg.country || null,
     sandbox: cfg.sandbox,
     enabled: cfg.enabled,
     updated_at: new Date().toISOString(),

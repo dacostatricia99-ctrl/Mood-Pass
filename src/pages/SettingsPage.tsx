@@ -7,7 +7,21 @@ import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import { getEstablishmentSettings, updateEstablishment, uploadEstablishmentLogo, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
 
-const EMPTY: PaymentConfig = { siteId: '', apiKey: '', sandbox: true, enabled: false };
+const EMPTY: PaymentConfig = { siteId: '', apiKey: '', country: 'CIV', sandbox: true, enabled: false };
+
+// CFA-franc countries PawaPay supports for mobile money (XOF = West, XAF = Central).
+const PAY_COUNTRIES: { code: string; label: string }[] = [
+  { code: 'CIV', label: "Côte d'Ivoire" },
+  { code: 'SEN', label: 'Sénégal' },
+  { code: 'BEN', label: 'Bénin' },
+  { code: 'BFA', label: 'Burkina Faso' },
+  { code: 'TGO', label: 'Togo' },
+  { code: 'MLI', label: 'Mali' },
+  { code: 'NER', label: 'Niger' },
+  { code: 'CMR', label: 'Cameroun' },
+  { code: 'COG', label: 'Congo' },
+  { code: 'GAB', label: 'Gabon' },
+];
 
 export function SettingsPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -169,6 +183,12 @@ export function SettingsPage() {
             <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
               {t('pay.apiKey')}
               <input value={cfg.apiKey} onChange={(e) => setCfg({ ...cfg, apiKey: e.target.value })} placeholder="PawaPay API token" type="password" style={{ ...field, marginTop: 4 }} />
+            </label>
+            <label style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
+              {t('pay.country')}
+              <select value={cfg.country} onChange={(e) => setCfg({ ...cfg, country: e.target.value })} style={{ ...field, marginTop: 4 }}>
+                {PAY_COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
+              </select>
             </label>
 
             <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', cursor: 'pointer', fontSize: 'var(--font-sm)', color: 'var(--text-primary)' }}>

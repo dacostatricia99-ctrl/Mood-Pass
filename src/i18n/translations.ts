@@ -75,6 +75,7 @@ export type TranslationKey =
   | 'pay.mmHint'
   | 'pay.siteId'
   | 'pay.apiKey'
+  | 'pay.country'
   | 'pay.sandbox'
   | 'pay.enable'
   | 'pay.sandboxNote'
@@ -245,6 +246,7 @@ export const translations: Record<Language, Dictionary> = {
     'pay.mmHint': 'Connectez votre compte PawaPay pour encaisser par Wave, Orange Money, MTN, Moov, Airtel. L\'argent va directement sur votre compte.',
     'pay.siteId': 'Site ID',
     'pay.apiKey': 'Jeton API PawaPay',
+    'pay.country': 'Pays',
     'pay.sandbox': 'Mode test (sandbox)',
     'pay.enable': 'Activer le paiement mobile',
     'pay.sandboxNote': 'En mode test, les paiements sont simulés (aucun argent réel n\'est débité).',
@@ -407,6 +409,7 @@ export const translations: Record<Language, Dictionary> = {
     'pay.mmHint': 'Connect your PawaPay account to accept Wave, Orange Money, MTN, Moov, Airtel. Money goes straight to your account.',
     'pay.siteId': 'Site ID',
     'pay.apiKey': 'PawaPay API token',
+    'pay.country': 'Country',
     'pay.sandbox': 'Test mode (sandbox)',
     'pay.enable': 'Enable mobile payment',
     'pay.sandboxNote': 'In test mode, payments are simulated (no real money is charged).',
@@ -569,6 +572,7 @@ export const translations: Record<Language, Dictionary> = {
     'pay.mmHint': 'اربط حساب PawaPay لقبول Wave وOrange Money وMTN وMoov وAirtel. تذهب الأموال مباشرة إلى حسابك.',
     'pay.siteId': 'معرّف الموقع',
     'pay.apiKey': 'رمز PawaPay API',
+    'pay.country': 'البلد',
     'pay.sandbox': 'وضع الاختبار',
     'pay.enable': 'تفعيل الدفع عبر الهاتف',
     'pay.sandboxNote': 'في وضع الاختبار، تكون المدفوعات محاكاة (لا يتم خصم أموال حقيقية).',
@@ -731,6 +735,7 @@ export const translations: Record<Language, Dictionary> = {
     'pay.mmHint': 'Ligue a sua conta PawaPay para receber via Wave, Orange Money, MTN, Moov, Airtel. O dinheiro vai diretamente para a sua conta.',
     'pay.siteId': 'Site ID',
     'pay.apiKey': 'Token da API PawaPay',
+    'pay.country': 'País',
     'pay.sandbox': 'Modo de teste (sandbox)',
     'pay.enable': 'Ativar pagamento móvel',
     'pay.sandboxNote': 'No modo de teste, os pagamentos são simulados (nenhum dinheiro real é cobrado).',
@@ -893,6 +898,7 @@ export const translations: Record<Language, Dictionary> = {
     'pay.mmHint': '连接您的 PawaPay 账户以接受 Wave、Orange Money、MTN、Moov、Airtel。资金直接进入您的账户。',
     'pay.siteId': '站点 ID',
     'pay.apiKey': 'PawaPay API 令牌',
+    'pay.country': '国家/地区',
     'pay.sandbox': '测试模式（沙盒）',
     'pay.enable': '启用移动支付',
     'pay.sandboxNote': '在测试模式下，支付为模拟操作（不会扣除真实款项）。',

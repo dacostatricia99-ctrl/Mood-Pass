@@ -41,7 +41,7 @@ serve(async (req) => {
 
     const { data: cfg } = await admin
       .from('payment_configs')
-      .select('site_id, api_key, sandbox, enabled')
+      .select('api_key, country, sandbox, enabled')
       .eq('establishment_id', establishment_id)
       .maybeSingle()
 
@@ -61,7 +61,11 @@ serve(async (req) => {
     // depositId is a fresh UUID stored on the order so the callback can map back.
     const depositId = crypto.randomUUID()
     const base = cfg.sandbox ? 'https://api.sandbox.pawapay.io' : 'https://api.pawapay.io'
-    // FCFA is XOF (no decimals).
+    // "FCFA" is XOF (West Africa) or XAF (Central Africa) depending on country.
+    // Central-African CFA countries; everything else here defaults to XOF.
+    const XAF = new Set(['CMR', 'CAF', 'TCD', 'COG', 'GNQ', 'GAB'])
+    const country = (cfg.country || 'CIV').toUpperCase()
+    const currency = XAF.has(country) ? 'XAF' : 'XOF'
     const amount = String(Math.round(Number(order.total_amount)))
 
     const ppRes = await fetch(`${base}/v2/paymentpage`, {
@@ -70,7 +74,8 @@ serve(async (req) => {
       body: JSON.stringify({
         depositId,
         returnUrl: return_url ?? Deno.env.get('SUPABASE_URL'),
-        amountDetails: { amount, currency: 'XOF' },
+        amountDetails: { amount, currency },
+        country,
         reason: `Commande ${String(order_id).slice(0, 8)}`,
         metadata: [{ orderId: String(order_id) }],
       }),

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  QrCode, Smartphone, BrainCircuit, ClipboardList, LayoutGrid, Smile, PieChart,
+  Smartphone, BrainCircuit, ClipboardList, LayoutGrid, Smile, PieChart,
   Zap, Clock, Headphones, Check, ArrowRight, Utensils, BedDouble, Wine,
   Plus, Trash2, Power, CalendarClock, Percent,
 } from 'lucide-react';
@@ -11,12 +11,10 @@ const PURPLE = 'linear-gradient(135deg, #6b4cff 0%, #a855f7 100%)';
 
 function Logo({ light = false }: { light?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ width: 34, height: 34, borderRadius: 9, background: PURPLE, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <QrCode size={20} />
-      </div>
-      <span style={{ fontSize: 20, fontWeight: 800, color: light ? 'white' : '#1e1b2e' }}>
-        Mood<span style={{ color: ACCENT }}>Pass</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+      <img src="/logo-mark.png" alt="" aria-hidden="true" width={36} height={36} style={{ display: 'block', objectFit: 'contain' }} />
+      <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '0.4px', color: light ? 'white' : '#1e1b2e' }}>
+        MOOD <span style={{ color: light ? '#d6ccff' : ACCENT }}>PASS</span>
       </span>
     </div>
   );
