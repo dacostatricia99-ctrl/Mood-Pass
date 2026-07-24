@@ -61,11 +61,18 @@ serve(async (req) => {
     // depositId is a fresh UUID stored on the order so the callback can map back.
     const depositId = crypto.randomUUID()
     const base = cfg.sandbox ? 'https://api.sandbox.pawapay.io' : 'https://api.pawapay.io'
-    // "FCFA" is XOF (West Africa) or XAF (Central Africa) depending on country.
-    // Central-African CFA countries; everything else here defaults to XOF.
-    const XAF = new Set(['CMR', 'CAF', 'TCD', 'COG', 'GNQ', 'GAB'])
+    // Each country has its own currency. "FCFA" is XOF (West) or XAF (Central);
+    // DR Congo uses CDF. Explicit map so the amount is charged in the right one.
+    const CURRENCY: Record<string, string> = {
+      // XOF (West-African CFA)
+      BEN: 'XOF', BFA: 'XOF', CIV: 'XOF', GNB: 'XOF', MLI: 'XOF', NER: 'XOF', SEN: 'XOF', TGO: 'XOF',
+      // XAF (Central-African CFA)
+      CMR: 'XAF', CAF: 'XAF', TCD: 'XAF', COG: 'XAF', GNQ: 'XAF', GAB: 'XAF',
+      // Others
+      COD: 'CDF',
+    }
     const country = (cfg.country || 'CIV').toUpperCase()
-    const currency = XAF.has(country) ? 'XAF' : 'XOF'
+    const currency = CURRENCY[country] ?? 'XOF'
     const amount = String(Math.round(Number(order.total_amount)))
 
     const ppRes = await fetch(`${base}/v2/paymentpage`, {

@@ -7,10 +7,13 @@ import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import { getEstablishmentSettings, updateEstablishment, uploadEstablishmentLogo, getPaymentConfig, savePaymentConfig, type PaymentConfig } from '../lib/managerApi';
 
-const EMPTY: PaymentConfig = { siteId: '', apiKey: '', country: 'CIV', sandbox: true, enabled: false };
+const EMPTY: PaymentConfig = { siteId: '', apiKey: '', country: 'COG', sandbox: true, enabled: false };
 
-// CFA-franc countries PawaPay supports for mobile money (XOF = West, XAF = Central).
+// Countries PawaPay supports for mobile money (currency derived server-side:
+// XOF = West-African CFA, XAF = Central-African CFA, CDF = DR Congo franc).
 const PAY_COUNTRIES: { code: string; label: string }[] = [
+  { code: 'COD', label: 'RD Congo (Kinshasa)' },
+  { code: 'COG', label: 'Congo (Brazzaville)' },
   { code: 'CIV', label: "Côte d'Ivoire" },
   { code: 'SEN', label: 'Sénégal' },
   { code: 'BEN', label: 'Bénin' },
@@ -19,7 +22,6 @@ const PAY_COUNTRIES: { code: string; label: string }[] = [
   { code: 'MLI', label: 'Mali' },
   { code: 'NER', label: 'Niger' },
   { code: 'CMR', label: 'Cameroun' },
-  { code: 'COG', label: 'Congo' },
   { code: 'GAB', label: 'Gabon' },
 ];
 
