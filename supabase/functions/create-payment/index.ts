@@ -39,6 +39,12 @@ serve(async (req) => {
     if (order.establishment_id !== establishment_id) throw new Error('Order/establishment mismatch')
     if (order.payment_status === 'paid') return json({ paid: true })
 
+    // total_amount is derived from the order's lines by a database trigger, so
+    // it is authoritative and cannot be set by the browser. An order with no
+    // lines still adds up to 0, and must never reach a payment provider.
+    const amountDue = Number(order.total_amount)
+    if (!Number.isFinite(amountDue) || amountDue <= 0) throw new Error('Order has no payable amount')
+
     const { data: cfg } = await admin
       .from('payment_configs')
       .select('api_key, country, sandbox, enabled')
@@ -73,7 +79,7 @@ serve(async (req) => {
     }
     const country = (cfg.country || 'CIV').toUpperCase()
     const currency = CURRENCY[country] ?? 'XOF'
-    const amount = String(Math.round(Number(order.total_amount)))
+    const amount = String(Math.round(amountDue))
 
     const ppRes = await fetch(`${base}/v2/paymentpage`, {
       method: 'POST',

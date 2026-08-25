@@ -182,6 +182,9 @@ export async function createOrder(params: {
       id: orderId,
       establishment_id: establishmentId,
       table_number: tableNumber?.trim() || null,
+      // Advisory only: a database trigger zeroes this and rebuilds it from the
+      // order's lines, priced against the products table. The browser is never
+      // the authority on what an order costs.
       total_amount: total,
       payment_method: paymentMethod,
       // Cash is settled in person (unpaid until the manager confirms); mobile
@@ -191,6 +194,8 @@ export async function createOrder(params: {
 
   if (orderError) throw orderError;
 
+  // unit_price is likewise advisory — the server overwrites each line with the
+  // product's current price, so a stale cart is charged the real menu price.
   const rows = items.map((item) => ({
     order_id: orderId,
     product_id: item.id,
