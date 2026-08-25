@@ -136,5 +136,13 @@ SELECT test_rejects($$
                                   TIMESTAMPTZ '2026-08-25 00:00:00+00')$$,
     'the anonymous customer role cannot execute it at all');
 
+-- The check above would also pass on the ownership test alone, which fires for
+-- anyone whose auth.uid() is null. This one is about the grant itself: Supabase
+-- hands anon EXECUTE on new public functions by default, and REVOKE ... FROM
+-- PUBLIC does not take it back.
+SELECT test_assert(
+    NOT has_function_privilege('anon', 'public.get_order_stats(uuid, timestamptz)', 'EXECUTE'),
+    'anon holds no EXECUTE grant on it either');
+
 \echo ''
 \echo 'Stats aggregation verified.'

@@ -68,9 +68,25 @@ BEGIN
 END;
 $$;
 
--- Managers only: the function reads across RLS, so it must not be reachable
--- by the anonymous customer role.
+-- Managers only: the function reads across RLS, so it must not be reachable by
+-- the anonymous customer role.
+--
+-- Revoking from PUBLIC is not enough on its own. Supabase's default privileges
+-- grant EXECUTE on new functions in `public` to anon and authenticated, and a
+-- grant held by a role by name is not touched by REVOKE ... FROM PUBLIC. So
+-- anon is revoked explicitly. The ownership check inside the function would
+-- refuse an anonymous caller anyway — auth.uid() is null for them — but a
+-- function that reads every establishment's turnover should not be callable
+-- with the key that ships in the JS bundle.
 REVOKE ALL ON FUNCTION public.get_order_stats(UUID, TIMESTAMPTZ) FROM PUBLIC;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+        REVOKE ALL ON FUNCTION public.get_order_stats(UUID, TIMESTAMPTZ) FROM anon;
+    END IF;
+END $$;
+
 GRANT EXECUTE ON FUNCTION public.get_order_stats(UUID, TIMESTAMPTZ) TO authenticated;
 
 -- The floor and kitchen views now filter by status server-side instead of
