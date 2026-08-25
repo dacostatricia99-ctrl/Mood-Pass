@@ -81,7 +81,7 @@ export function clearPendingPayment(): void {
   }
 }
 
-export type TrackStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
+export type TrackStatus = 'new' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
 
 export interface LastOrder {
   id: string;
@@ -93,35 +93,72 @@ export interface LastOrder {
 const LAST_ORDER_KEY = 'moodpass.lastOrder';
 // Stop offering to track an order after this long (orders are short-lived).
 const LAST_ORDER_TTL_MS = 3 * 60 * 60 * 1000;
+// A table can run a long evening, but not an unbounded one.
+const MAX_TRACKED_ORDERS = 20;
 
-/** Remembers the customer's most recent order so they can re-open its tracker. */
-export function saveLastOrder(order: LastOrder): void {
+/**
+ * Reads the tracked orders, newest first, dropping expired ones.
+ *
+ * Tolerates the single-object shape this key used to hold, so a customer who
+ * ordered just before the app updated keeps their tracker.
+ */
+function readTrackedOrders(): LastOrder[] {
   try {
-    localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order));
+    const raw = localStorage.getItem(LAST_ORDER_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as LastOrder[] | LastOrder;
+    const list = Array.isArray(parsed) ? parsed : [parsed];
+    const now = Date.now();
+    return list
+      .filter((o) => o && typeof o.id === 'string' && now - o.ts <= LAST_ORDER_TTL_MS)
+      .sort((a, b) => b.ts - a.ts);
+  } catch {
+    return [];
+  }
+}
+
+function writeTrackedOrders(list: LastOrder[]): void {
+  try {
+    localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(list.slice(0, MAX_TRACKED_ORDERS)));
   } catch {
     /* storage unavailable — ignore */
   }
 }
 
-/** Returns the saved order for the given slug if recent enough, else null. */
-export function getLastOrder(slug: string): LastOrder | null {
-  try {
-    const raw = localStorage.getItem(LAST_ORDER_KEY);
-    if (!raw) return null;
-    const o = JSON.parse(raw) as LastOrder;
-    if (o.slug !== slug || Date.now() - o.ts > LAST_ORDER_TTL_MS) return null;
-    return o;
-  } catch {
-    return null;
-  }
+/**
+ * Remembers an order so the customer can re-open its tracker.
+ *
+ * A table orders several times over a meal — a round of drinks, then food,
+ * then dessert — and each of those is its own order that the customer should
+ * still be able to follow. So this appends rather than replaces; re-saving the
+ * same id updates it in place.
+ */
+export function saveLastOrder(order: LastOrder): void {
+  const rest = readTrackedOrders().filter((o) => o.id !== order.id);
+  writeTrackedOrders([order, ...rest]);
 }
 
-export function clearLastOrder(): void {
-  try {
-    localStorage.removeItem(LAST_ORDER_KEY);
-  } catch {
-    /* ignore */
+/** Every still-trackable order for this establishment, newest first. */
+export function getTableOrders(slug: string): LastOrder[] {
+  return readTrackedOrders().filter((o) => o.slug === slug);
+}
+
+/** The most recent still-trackable order for the given slug, else null. */
+export function getLastOrder(slug: string): LastOrder | null {
+  return getTableOrders(slug)[0] ?? null;
+}
+
+/** Drops one tracked order, or all of them when called with no id. */
+export function clearLastOrder(id?: string): void {
+  if (id === undefined) {
+    try {
+      localStorage.removeItem(LAST_ORDER_KEY);
+    } catch {
+      /* ignore */
+    }
+    return;
   }
+  writeTrackedOrders(readTrackedOrders().filter((o) => o.id !== id));
 }
 
 /**

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
-import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle, Wallet, Smartphone } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, CheckCircle, Loader2, Clock, ChefHat, PackageCheck, XCircle, Wallet, Smartphone, HandPlatter } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { localizeProductText } from '../i18n/menuData';
 import { createOrder, fetchOrderStatus, startMobilePayment, saveLastOrder, savePendingPayment, type PaymentMethod, type PlacedOrder, type TrackStatus } from '../lib/orderApi';
@@ -19,12 +20,18 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
   const { items, isDrawerOpen, toggleDrawer, updateQuantity, getCartTotal, clearCart } = useCartStore();
   const { language, t } = useTranslation();
 
-  const [tableNumber, setTableNumber] = useState('');
+  // The QR sticker on the table carries ?table=N, so a seated customer never
+  // types their table number — and cannot mistype someone else's. The field
+  // stays editable only when the menu was opened without one.
+  const [searchParams] = useSearchParams();
+  const scannedTable = (searchParams.get('table') ?? '').trim();
+  const [typedTable, setTypedTable] = useState('');
+  const tableNumber = scannedTable || typedTable;
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [status, setStatus] = useState<Status>('idle');
   const [reference, setReference] = useState('');
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
-  const [trackStatus, setTrackStatus] = useState<TrackStatus>('pending');
+  const [trackStatus, setTrackStatus] = useState<TrackStatus>('new');
 
   // Poll the order status so the customer follows it live (anon can't subscribe
   // to the orders table, so we poll the capability-scoped RPC every few seconds).
@@ -48,10 +55,10 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
   const closeDrawer = () => {
     setStatus('idle');
     setReference('');
-    setTableNumber('');
+    setTypedTable('');
     setPaymentMethod('cash');
     setPlacedOrder(null);
-    setTrackStatus('pending');
+    setTrackStatus('new');
     toggleDrawer();
   };
 
@@ -93,7 +100,7 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
       }
       setReference(order.reference);
       setPlacedOrder(order);
-      setTrackStatus('pending');
+      setTrackStatus('new');
       clearCart();
       setStatus('success');
     } catch {
@@ -102,14 +109,15 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
   };
 
   // Maps the order status to a 0-based step in the tracker (cancelled = -1).
-  const trackStep = trackStatus === 'cancelled' ? -1
-    : trackStatus === 'completed' ? 2
-    : trackStatus === 'accepted' ? 1
-    : 0;
+  const TRACK_STEP: Record<TrackStatus, number> = {
+    new: 0, preparing: 1, ready: 2, served: 3, completed: 3, cancelled: -1,
+  };
+  const trackStep = TRACK_STEP[trackStatus];
   const trackSteps = [
     { key: 'order.track.received' as const, Icon: Clock },
     { key: 'order.track.preparing' as const, Icon: ChefHat },
     { key: 'order.track.ready' as const, Icon: PackageCheck },
+    { key: 'order.track.served' as const, Icon: HandPlatter },
   ];
 
   return (
@@ -247,14 +255,20 @@ export function CartDrawer({ currency, mobileMoneyEnabled, slug }: CartDrawerPro
             {/* Footer */}
             {items.length > 0 && (
               <div style={{ padding: 'var(--space-md)', borderTop: 'var(--border-glass)', background: 'var(--bg-surface-elevated)' }}>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={tableNumber}
-                  onChange={(e) => setTableNumber(e.target.value)}
-                  placeholder={t('cart.tableNumber')}
-                  style={{ width: '100%', boxSizing: 'border-box', marginBottom: 'var(--space-md)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: 'var(--border-glass)', background: 'var(--bg-surface)', color: 'var(--text-primary)', outline: 'none' }}
-                />
+                {scannedTable ? (
+                  <div style={{ marginBottom: 'var(--space-md)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 'var(--font-sm)' }}>
+                    {t('cart.atTable')} <strong style={{ color: 'var(--text-primary)' }}>{scannedTable}</strong>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={typedTable}
+                    onChange={(e) => setTypedTable(e.target.value)}
+                    placeholder={t('cart.tableNumber')}
+                    style={{ width: '100%', boxSizing: 'border-box', marginBottom: 'var(--space-md)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: 'var(--border-glass)', background: 'var(--bg-surface)', color: 'var(--text-primary)', outline: 'none' }}
+                  />
+                )}
 
                 {/* Payment method */}
                 <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)' }}>{t('checkout.payMethod')}</div>

@@ -6,6 +6,7 @@ import {
   fetchOrderStatus,
   getLastOrder,
   getPendingPayment,
+  getTableOrders,
   saveLastOrder,
   savePendingPayment,
   verifyPayment,
@@ -137,6 +138,61 @@ describe('last order (re-opening the tracker)', () => {
     clearLastOrder();
 
     expect(getLastOrder('chez-a')).toBeNull();
+  });
+});
+
+describe('several orders from the same table', () => {
+  // A table orders drinks, then food, then dessert. Each is its own order and
+  // the customer must be able to follow all of them.
+  // Recent, and ordered: the tracker drops anything older than its TTL.
+  const now = Date.now();
+  const drinks = { id: 'order-a', reference: '#AAA111', slug: 'chez-a', ts: now - 2000 };
+  const food = { id: 'order-b', reference: '#BBB222', slug: 'chez-a', ts: now - 1000 };
+
+  it('does not let a new order erase the previous one', () => {
+    saveLastOrder(drinks);
+    saveLastOrder(food);
+
+    expect(getTableOrders('chez-a').map((o) => o.id)).toEqual(['order-b', 'order-a']);
+  });
+
+  it('still surfaces the most recent as the tracked one', () => {
+    saveLastOrder(drinks);
+    saveLastOrder(food);
+
+    expect(getLastOrder('chez-a')?.id).toBe('order-b');
+  });
+
+  it('updates an order in place rather than duplicating it', () => {
+    saveLastOrder(drinks);
+    saveLastOrder({ ...drinks, reference: '#RENAMED' });
+
+    const all = getTableOrders('chez-a');
+    expect(all).toHaveLength(1);
+    expect(all[0].reference).toBe('#RENAMED');
+  });
+
+  it('dismisses one order without dropping the others', () => {
+    saveLastOrder(drinks);
+    saveLastOrder(food);
+
+    clearLastOrder('order-b');
+
+    expect(getTableOrders('chez-a').map((o) => o.id)).toEqual(['order-a']);
+  });
+
+  it('keeps each establishment separate', () => {
+    saveLastOrder(food);
+    saveLastOrder({ id: 'order-c', reference: '#CCC333', slug: 'chez-b', ts: now });
+
+    expect(getTableOrders('chez-a').map((o) => o.id)).toEqual(['order-b']);
+    expect(getTableOrders('chez-b').map((o) => o.id)).toEqual(['order-c']);
+  });
+
+  it('reads back an order saved in the older single-order format', () => {
+    store.set('moodpass.lastOrder', JSON.stringify({ ...food, ts: Date.now() }));
+
+    expect(getLastOrder('chez-a')?.id).toBe('order-b');
   });
 });
 

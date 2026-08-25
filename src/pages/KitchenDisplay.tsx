@@ -11,14 +11,15 @@ import {
   fetchOrders,
   updateOrderStatus,
   subscribeToOrders,
+  KITCHEN_STATUSES,
   type OrderView,
   type OrderStatus,
 } from '../lib/managerApi';
 import { playOrderChime, requestNotificationPermission, showOrderNotification } from '../lib/notifications';
 
 const DEMO_ORDERS: OrderView[] = [
-  { id: 'k1', reference: '#A1B2C3', tableNumber: '4', total: 0, status: 'pending', paymentMethod: 'cash', paymentStatus: 'unpaid', createdAt: new Date(Date.now() - 2 * 60000).toISOString(), items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Frites' }] },
-  { id: 'k2', reference: '#D4E5F6', tableNumber: '7', total: 0, status: 'accepted', paymentMethod: 'mobile_money', paymentStatus: 'paid', createdAt: new Date(Date.now() - 6 * 60000).toISOString(), items: [{ quantity: 1, name: 'Pizza Diabola' }] },
+  { id: 'k1', reference: '#A1B2C3', tableNumber: '4', total: 0, status: 'new', paymentMethod: 'cash', paymentStatus: 'unpaid', cashReceived: null, createdAt: new Date(Date.now() - 2 * 60000).toISOString(), items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Frites' }] },
+  { id: 'k2', reference: '#D4E5F6', tableNumber: '7', total: 0, status: 'preparing', paymentMethod: 'cash', paymentStatus: 'unpaid', cashReceived: null, createdAt: new Date(Date.now() - 6 * 60000).toISOString(), items: [{ quantity: 1, name: 'Pizza Diabola' }] },
 ];
 
 function timeHHMM(iso: string): string {
@@ -116,9 +117,10 @@ export function KitchenDisplay() {
     w.document.close();
   };
 
-  // Only orders the kitchen acts on, oldest first (FIFO).
+  // Only orders the kitchen acts on, oldest first (FIFO). Payment is
+  // deliberately not consulted: an unpaid order is cooked like any other.
   const active = orders
-    .filter((o) => o.status === 'pending' || o.status === 'accepted')
+    .filter((o) => KITCHEN_STATUSES.includes(o.status))
     .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
 
   return (
@@ -141,7 +143,7 @@ export function KitchenDisplay() {
       ) : (
         <main style={{ padding: 'var(--space-md)', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-md)', alignItems: 'start' }}>
           {active.map((order) => {
-            const isNew = order.status === 'pending';
+            const isNew = order.status === 'new';
             const accent = isNew ? '#f59e0b' : 'var(--primary-accent)';
             return (
               <div key={order.id} className="glass-panel" style={{ display: 'flex', flexDirection: 'column', borderTop: `4px solid ${accent}`, overflow: 'hidden' }}>
@@ -174,14 +176,14 @@ export function KitchenDisplay() {
                 <div style={{ padding: 'var(--space-md)', paddingTop: 0 }}>
                   {isNew ? (
                     <button
-                      onClick={() => changeStatus(order.id, 'accepted')}
+                      onClick={() => changeStatus(order.id, 'preparing')}
                       style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: '#f59e0b', color: 'white', fontWeight: 700, cursor: 'pointer' }}
                     >
                       <Check size={18} /> {t('kitchen.start')}
                     </button>
                   ) : (
                     <button
-                      onClick={() => changeStatus(order.id, 'completed')}
+                      onClick={() => changeStatus(order.id, 'ready')}
                       style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: '#16a34a', color: 'white', fontWeight: 700, cursor: 'pointer' }}
                     >
                       <CheckCheck size={18} /> {t('kitchen.markReady')}

@@ -1,9 +1,41 @@
 import type { Category, LocalizedField, Product } from '../types';
 import { supabase } from './supabase';
 
-export type OrderStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
+/**
+ * Where the food is. Never gated by payment — the kitchen starts cooking the
+ * moment the customer validates, whether or not the bill has been settled.
+ */
+export type OrderStatus = 'new' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+
+/**
+ * Where the money is. `cash_pending` is the window between the server bringing
+ * the bill to the table and the cash changing hands; `pending` is a
+ * mobile-money deposit in flight with the provider.
+ */
 export type PaymentMethod = 'cash' | 'mobile_money';
-export type PaymentStatus = 'unpaid' | 'pending' | 'paid';
+export type PaymentStatus = 'unpaid' | 'pending' | 'cash_pending' | 'paid';
+
+/** The kitchen's queue: what still has to be cooked. */
+export const KITCHEN_STATUSES: OrderStatus[] = ['new', 'preparing'];
+
+/** Still on the floor — the server has something left to do with it. */
+export const OPEN_STATUSES: OrderStatus[] = ['new', 'preparing', 'ready', 'served'];
+
+/** What the order becomes when the current step is done, or null at the end. */
+export function nextOrderStatus(status: OrderStatus): OrderStatus | null {
+  switch (status) {
+    case 'new': return 'preparing';
+    case 'preparing': return 'ready';
+    case 'ready': return 'served';
+    case 'served': return 'completed';
+    default: return null;
+  }
+}
+
+/** Change owed back to the customer, floored at zero. */
+export function changeDue(total: number, received: number): number {
+  return Math.max(0, Math.round((received - total) * 100) / 100);
+}
 
 export interface OrderItemView {
   quantity: number;
@@ -19,6 +51,8 @@ export interface OrderView {
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  /** What the customer handed over in cash, once settled. */
+  cashReceived: number | null;
   createdAt: string;
   items: OrderItemView[];
 }
@@ -187,14 +221,14 @@ export async function fetchEstablishmentBySlug(slug: string): Promise<ManagerEst
   return { id: data.id, currency: (data.currency as string) ?? 'FCFA' };
 }
 
-/** Counts pending orders for an establishment (owner-only via RLS). */
+/** Counts orders still waiting for the kitchen (owner-only via RLS). */
 export async function countPendingOrders(establishmentId: string): Promise<number> {
   if (!supabase) return 0;
   const { count, error } = await supabase
     .from('orders')
     .select('id', { count: 'exact', head: true })
     .eq('establishment_id', establishmentId)
-    .eq('status', 'pending');
+    .eq('status', 'new');
   if (error) return 0;
   return count ?? 0;
 }
@@ -206,6 +240,7 @@ interface OrderRow {
   status: OrderStatus;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
+  cash_received: number | null;
   created_at: string;
   order_items: {
     quantity: number;
@@ -218,7 +253,7 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
   if (!supabase) return [];
   const { data, error } = await supabase
     .from('orders')
-    .select('id, table_number, total_amount, status, payment_method, payment_status, created_at, order_items(quantity, products(name, name_i18n))')
+    .select('id, table_number, total_amount, status, payment_method, payment_status, cash_received, created_at, order_items(quantity, products(name, name_i18n))')
     .eq('establishment_id', establishmentId)
     .order('created_at', { ascending: false });
 
@@ -232,6 +267,7 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
     status: row.status,
     paymentMethod: row.payment_method ?? 'cash',
     paymentStatus: row.payment_status ?? 'unpaid',
+    cashReceived: row.cash_received,
     createdAt: row.created_at,
     items: (row.order_items ?? []).map((item) => {
       const product = Array.isArray(item.products) ? item.products[0] : item.products;
@@ -244,21 +280,42 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
   }));
 }
 
-/** Updates an order's status (owner-only via RLS). */
+/**
+ * Moves an order along its lifecycle (owner-only via RLS). Payment is never
+ * consulted here: the kitchen advances whether or not the bill is settled. The
+ * one exception lives in the database — closing an order requires it to be
+ * paid — and surfaces as a thrown error the caller resyncs from.
+ */
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
   if (error) throw error;
-  // When the order becomes ready, push a notification to the customer.
-  if (status === 'completed') {
+  // The food is ready: tell the customer so they stop watching the door.
+  if (status === 'ready') {
     supabase.functions.invoke('notify-order-ready', { body: { order_id: orderId } }).catch(() => {});
   }
 }
 
-/** Marks an order as paid — used by the manager to confirm a cash payment. */
-export async function setOrderPaid(orderId: string): Promise<void> {
+/**
+ * The server has taken the bill to the table and is waiting on the cash. Kept
+ * distinct from `unpaid` so the floor can see which tables are mid-settlement.
+ */
+export async function requestBill(orderId: string): Promise<void> {
   if (!supabase) return;
-  const { error } = await supabase.from('orders').update({ payment_status: 'paid' }).eq('id', orderId);
+  const { error } = await supabase.from('orders').update({ payment_status: 'cash_pending' }).eq('id', orderId);
+  if (error) throw error;
+}
+
+/**
+ * Confirms cash received at the table. `received` is what the customer handed
+ * over, recorded so the change given back is auditable; pass nothing when it
+ * was the exact amount.
+ */
+export async function setOrderPaid(orderId: string, received?: number): Promise<void> {
+  if (!supabase) return;
+  const patch: { payment_status: PaymentStatus; cash_received?: number } = { payment_status: 'paid' };
+  if (received !== undefined) patch.cash_received = received;
+  const { error } = await supabase.from('orders').update(patch).eq('id', orderId);
   if (error) throw error;
 }
 

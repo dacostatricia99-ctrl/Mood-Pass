@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Clock, ChefHat, PackageCheck, XCircle, X } from 'lucide-react';
+import { Clock, ChefHat, PackageCheck, XCircle, CheckCircle, HandPlatter, X } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { fetchOrderStatus, getLastOrder, clearLastOrder, type LastOrder, type TrackStatus } from '../lib/orderApi';
 import { playOrderChime } from '../lib/notifications';
 import type { TranslationKey } from '../i18n/translations';
 
 const STATUS: Record<TrackStatus, { key: TranslationKey; Icon: typeof Clock; color: string }> = {
-  pending: { key: 'order.track.received', Icon: Clock, color: '#f59e0b' },
-  accepted: { key: 'order.track.preparing', Icon: ChefHat, color: 'var(--primary-accent)' },
-  completed: { key: 'order.track.ready', Icon: PackageCheck, color: '#16a34a' },
+  new: { key: 'order.track.received', Icon: Clock, color: '#f59e0b' },
+  preparing: { key: 'order.track.preparing', Icon: ChefHat, color: 'var(--primary-accent)' },
+  ready: { key: 'order.track.ready', Icon: PackageCheck, color: '#16a34a' },
+  served: { key: 'order.track.served', Icon: HandPlatter, color: '#0ea5e9' },
+  completed: { key: 'order.track.completed', Icon: CheckCircle, color: '#4cff78' },
   cancelled: { key: 'order.track.cancelled', Icon: XCircle, color: 'var(--primary-red)' },
 };
 
@@ -19,7 +21,7 @@ const STATUS: Record<TrackStatus, { key: TranslationKey; Icon: typeof Clock; col
 export function OrderStatusBanner({ slug }: { slug?: string }) {
   const { t } = useTranslation();
   const [order, setOrder] = useState<LastOrder | null>(null);
-  const [status, setStatus] = useState<TrackStatus>('pending');
+  const [status, setStatus] = useState<TrackStatus>('new');
 
   useEffect(() => {
     if (!slug) return;
@@ -34,7 +36,7 @@ export function OrderStatusBanner({ slug }: { slug?: string }) {
       const s = await fetchOrderStatus(order.id);
       if (!active || !s) return;
       // Alert the customer the moment the order becomes ready.
-      if (s === 'completed' && prev !== null && prev !== 'completed') {
+      if (s === 'ready' && prev !== null && prev !== 'ready') {
         playOrderChime();
         try { navigator.vibrate?.(200); } catch { /* ignore */ }
       }
@@ -53,7 +55,7 @@ export function OrderStatusBanner({ slug }: { slug?: string }) {
 
   const meta = STATUS[status];
   const dismiss = () => {
-    clearLastOrder();
+    clearLastOrder(order.id);
     setOrder(null);
   };
 

@@ -14,7 +14,7 @@ import type { LocalizedField } from '../types';
 function demoOrders(): OrderView[] {
   const now = Date.now();
   const mk = (daysAgo: number, total: number, items: { quantity: number; name: string }[]): OrderView => ({
-    id: `d${daysAgo}-${total}`, reference: '#DEMO', tableNumber: null, total, status: 'completed',
+    id: `d${daysAgo}-${total}`, reference: '#DEMO', tableNumber: null, total, status: 'completed', cashReceived: null,
     paymentMethod: 'cash', paymentStatus: 'paid',
     createdAt: new Date(now - daysAgo * 86400000).toISOString(), items,
   });
