@@ -245,18 +245,18 @@ interface OrderRow {
   }[] | null;
 }
 
-/** Loads an establishment's orders (most recent first) with their line items. */
-export async function fetchOrders(establishmentId: string): Promise<OrderView[]> {
-  if (!supabase) return [];
-  const { data, error } = await supabase
-    .from('orders')
-    .select('id, table_number, total_amount, status, payment_method, payment_status, cash_received, created_at, order_items(quantity, products(name, name_i18n))')
-    .eq('establishment_id', establishmentId)
-    .order('created_at', { ascending: false });
+const ORDER_COLUMNS =
+  'id, table_number, total_amount, status, payment_method, payment_status, cash_received, created_at, order_items(quantity, products(name, name_i18n))';
 
-  if (error || !data) return [];
+// A service can produce a lot of orders; every screen reading them is bounded so
+// none of them degrades into fetching the establishment's entire history.
+const KITCHEN_LIMIT = 100;
+const FLOOR_LIMIT = 100;
+/** How far back the floor view still shows orders it has finished with. */
+const SETTLED_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-  return (data as OrderRow[]).map((row) => ({
+function toOrderViews(rows: OrderRow[]): OrderView[] {
+  return rows.map((row) => ({
     id: row.id,
     reference: shortRef(row.id),
     tableNumber: row.table_number,
@@ -275,6 +275,132 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
       };
     }),
   }));
+}
+
+/** Orders the kitchen still has to cook, oldest first (FIFO). */
+export async function fetchKitchenOrders(establishmentId: string): Promise<OrderView[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('orders')
+    .select(ORDER_COLUMNS)
+    .eq('establishment_id', establishmentId)
+    .in('status', KITCHEN_STATUSES)
+    .order('created_at', { ascending: true })
+    .limit(KITCHEN_LIMIT);
+  if (error || !data) return [];
+  return toOrderViews(data as OrderRow[]);
+}
+
+/**
+ * What the floor still has to deal with, plus what it settled in the last day.
+ *
+ * Two queries rather than one `or(...)`: an order left open overnight must not
+ * fall out of the only screen that can close it, while finished orders should
+ * not accumulate on it forever. Newest first.
+ */
+export async function fetchFloorOrders(establishmentId: string): Promise<OrderView[]> {
+  if (!supabase) return [];
+  const since = new Date(Date.now() - SETTLED_WINDOW_MS).toISOString();
+
+  const [open, recent] = await Promise.all([
+    supabase
+      .from('orders')
+      .select(ORDER_COLUMNS)
+      .eq('establishment_id', establishmentId)
+      .in('status', ['new', 'preparing', 'ready', 'served'])
+      .order('created_at', { ascending: false })
+      .limit(FLOOR_LIMIT),
+    supabase
+      .from('orders')
+      .select(ORDER_COLUMNS)
+      .eq('establishment_id', establishmentId)
+      .in('status', ['completed', 'cancelled'])
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(FLOOR_LIMIT),
+  ]);
+
+  if (open.error && recent.error) return [];
+  // The two status sets are disjoint, so concatenating cannot duplicate a row.
+  const rows = [...((open.data ?? []) as OrderRow[]), ...((recent.data ?? []) as OrderRow[])];
+  return toOrderViews(rows).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+}
+
+export interface OrderStats {
+  revenueToday: number;
+  ordersToday: number;
+  totalRevenue: number;
+  orders: number;
+  topProducts: { name: string; nameI18n?: LocalizedField; qty: number }[];
+  days: { date: string; value: number }[];
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Local midnight, the day boundary the restaurant actually works to. */
+export function startOfToday(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * The same aggregates as `get_order_stats`, over a list already in hand.
+ *
+ * Only the bundled demo data goes through this — with a backend the database
+ * does the work, so the numbers stay right however many orders there are.
+ */
+export function computeStats(orders: OrderView[], dayStart: Date): OrderStats {
+  const valid = orders.filter((o) => o.status !== 'cancelled');
+  const start = dayStart.getTime();
+  const today = valid.filter((o) => +new Date(o.createdAt) >= start);
+
+  const byProduct = new Map<string, { name: string; nameI18n?: LocalizedField; qty: number }>();
+  for (const o of valid) {
+    for (const it of o.items) {
+      const cur = byProduct.get(it.name) ?? { name: it.name, nameI18n: it.nameI18n, qty: 0 };
+      cur.qty += it.quantity;
+      byProduct.set(it.name, cur);
+    }
+  }
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const from = start - (6 - i) * DAY_MS;
+    const value = valid
+      .filter((o) => {
+        const c = +new Date(o.createdAt);
+        return c >= from && c < from + DAY_MS;
+      })
+      .reduce((s, o) => s + o.total, 0);
+    return { date: new Date(from).toISOString(), value };
+  });
+
+  return {
+    revenueToday: today.reduce((s, o) => s + o.total, 0),
+    ordersToday: today.length,
+    totalRevenue: valid.reduce((s, o) => s + o.total, 0),
+    orders: valid.length,
+    topProducts: [...byProduct.values()]
+      .sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name))
+      .slice(0, 5),
+    days,
+  };
+}
+
+/**
+ * Aggregates for the stats screen, computed in the database.
+ *
+ * `dayStart` is the caller's own start-of-today, so the day boundaries follow
+ * the restaurant's timezone rather than the server's.
+ */
+export async function fetchOrderStats(establishmentId: string, dayStart: Date): Promise<OrderStats | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc('get_order_stats', {
+    est_id: establishmentId,
+    day_start: dayStart.toISOString(),
+  });
+  if (error || !data) return null;
+  return data as OrderStats;
 }
 
 /**

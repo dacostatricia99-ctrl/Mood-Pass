@@ -5,7 +5,7 @@ import { localizeText } from '../i18n/menuData';
 import { formatPrice } from '../lib/format';
 import type { TranslationKey } from '../i18n/translations';
 import {
-  fetchOrders,
+  fetchFloorOrders,
   updateOrderStatus,
   requestBill,
   setOrderPaid,
@@ -82,7 +82,7 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
   useEffect(() => {
     if (!isConfigured || !establishmentId) return;
     let active = true;
-    fetchOrders(establishmentId).then((data) => {
+    fetchFloorOrders(establishmentId).then((data) => {
       if (active) setOrders(data);
     });
     return () => {
@@ -91,7 +91,7 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
   }, [isConfigured, establishmentId, refreshKey]);
 
   const resync = async () => {
-    if (establishmentId) setOrders(await fetchOrders(establishmentId));
+    if (establishmentId) setOrders(await fetchFloorOrders(establishmentId));
   };
 
   const changeStatus = async (id: string, status: OrderStatus) => {

@@ -8,10 +8,9 @@ import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import {
   fetchEstablishmentBySlug,
-  fetchOrders,
+  fetchKitchenOrders,
   updateOrderStatus,
   subscribeToOrders,
-  KITCHEN_STATUSES,
   type OrderView,
   type OrderStatus,
 } from '../lib/managerApi';
@@ -65,7 +64,7 @@ export function KitchenDisplay() {
   useEffect(() => {
     if (!isConfigured || !establishmentId) return;
     let active = true;
-    const load = () => fetchOrders(establishmentId).then((data) => {
+    const load = () => fetchKitchenOrders(establishmentId).then((data) => {
       if (active) setOrders(data);
     });
     load();
@@ -90,7 +89,7 @@ export function KitchenDisplay() {
       try {
         await updateOrderStatus(id, status);
       } catch {
-        if (establishmentId) setOrders(await fetchOrders(establishmentId));
+        if (establishmentId) setOrders(await fetchKitchenOrders(establishmentId));
       }
     }
   };
@@ -128,11 +127,11 @@ export function KitchenDisplay() {
     w.document.close();
   };
 
-  // Only orders the kitchen acts on, oldest first (FIFO). Payment is
-  // deliberately not consulted: an unpaid order is cooked like any other.
-  const active = orders
-    .filter((o) => KITCHEN_STATUSES.includes(o.status))
-    .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
+  // Already narrowed to the kitchen queue and ordered FIFO by the query. The
+  // demo list is filtered here so it obeys the same rule without a backend.
+  // Payment is deliberately never consulted: an unpaid order is cooked like
+  // any other.
+  const active = orders.filter((o) => o.status === 'new' || o.status === 'preparing');
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
