@@ -50,7 +50,7 @@ serve(async (req) => {
       await admin.from('orders').update({ payment_status: 'paid' }).eq('id', order.id)
     }
     return new Response('ok', { status: 200 })
-  } catch (_e) {
+  } catch {
     // Always 200 so PawaPay doesn't retry forever on our errors.
     return new Response('error', { status: 200 })
   }

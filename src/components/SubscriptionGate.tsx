@@ -17,15 +17,14 @@ export function SubscriptionGate({ children }: { children: ReactNode }) {
   const { isConfigured } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [state, setState] = useState<GateState>('loading');
+  // Demo mode has no subscription to check, so the gate opens immediately
+  // rather than rendering a spinner it would correct one tick later.
+  const [state, setState] = useState<GateState>(isConfigured && slug ? 'loading' : 'ok');
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
 
   useEffect(() => {
-    if (!isConfigured || !slug) {
-      setState('ok');
-      return;
-    }
+    if (!isConfigured || !slug) return;
     let active = true;
     (async () => {
       const est = await fetchEstablishmentBySlug(slug);

@@ -33,7 +33,17 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
   const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  // The component renders a placeholder when there is no menu to load, so
+  // this only ever describes a real fetch.
+  const [loading, setLoading] = useState(isConfigured && !!establishmentId);
+
+  // The establishment resolves after mount, and can change. Re-enter the
+  // loading state as soon as that happens rather than a render later.
+  const [loadedFor, setLoadedFor] = useState(establishmentId);
+  if (establishmentId !== loadedFor) {
+    setLoadedFor(establishmentId);
+    setLoading(isConfigured && !!establishmentId);
+  }
 
   const [newCategory, setNewCategory] = useState('');
   // categoryId currently showing its "add product" form, with the draft.
@@ -48,12 +58,8 @@ export function MenuEditor({ establishmentId, currency, isConfigured }: MenuEdit
   const pendingProductRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!isConfigured || !establishmentId) {
-      setLoading(false);
-      return;
-    }
+    if (!isConfigured || !establishmentId) return;
     let active = true;
-    setLoading(true);
     fetchMenu(establishmentId).then((menu) => {
       if (!active) return;
       setCategories(menu.categories);

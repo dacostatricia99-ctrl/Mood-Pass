@@ -37,8 +37,13 @@ export function KitchenDisplay() {
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
   const [orders, setOrders] = useState<OrderView[]>(() => (isConfigured ? [] : DEMO_ORDERS));
 
+  // Holds the latest translator for the realtime callback below, without making
+  // the subscription depend on it (which would re-subscribe on every language
+  // change). Synced in an effect: a ref must not be written during render.
   const tRef = useRef(t);
-  tRef.current = t;
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   useEffect(() => {
     requestNotificationPermission();
@@ -64,13 +69,19 @@ export function KitchenDisplay() {
       if (active) setOrders(data);
     });
     load();
-    return subscribeToOrders(establishmentId, (event) => {
+    const unsubscribe = subscribeToOrders(establishmentId, (event) => {
       load();
       if (event === 'INSERT') {
         playOrderChime();
         showOrderNotification(tRef.current('notify.newOrderTitle'), tRef.current('notify.newOrderBody'));
       }
     });
+    return () => {
+      // Both halves matter: stop listening, and drop the result of any fetch
+      // still in flight so it cannot set state after this effect is torn down.
+      active = false;
+      unsubscribe();
+    };
   }, [isConfigured, establishmentId]);
 
   const changeStatus = async (id: string, status: OrderStatus) => {
@@ -112,7 +123,7 @@ export function KitchenDisplay() {
       ${items}
       <hr>
       <div class="foot">Mood Pass</div>
-      <script>window.onload = function(){ window.print(); }<\/script>
+      <script>window.onload = function(){ window.print(); }</script>
     </body></html>`);
     w.document.close();
   };

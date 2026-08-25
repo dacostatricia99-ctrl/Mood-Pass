@@ -86,7 +86,7 @@ ${JSON.stringify(items.map((it) => ({ name: it.name, description: it.description
       name_i18n: translated[idx]?.name_i18n ?? {},
       description_i18n: translated[idx]?.description_i18n ?? {},
     }));
-  } catch (_err) {
+  } catch {
     // Never block the write on a translation failure — store canonical text only.
     return items.map(empty);
   }

@@ -58,7 +58,7 @@ serve(async (req) => {
     }).eq('establishment_id', establishmentId)
 
     return new Response('ok', { status: 200 })
-  } catch (_e) {
+  } catch {
     return new Response('error', { status: 200 })
   }
 })

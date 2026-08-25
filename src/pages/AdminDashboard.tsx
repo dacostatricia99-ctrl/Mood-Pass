@@ -13,14 +13,24 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [granting, setGranting] = useState<string | null>(null);
 
-  const load = async () => {
-    const res = await fetchAdminOverview();
+  const applyOverview = (res: Awaited<ReturnType<typeof fetchAdminOverview>>) => {
     if ('error' in res) setError(res.error);
     else setData(res);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [session]);
+  const load = async () => applyOverview(await fetchAdminOverview());
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const res = await fetchAdminOverview();
+      if (active) applyOverview(res);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [session]);
 
   const handleGrant = async (row: AdminRow) => {
     if (granting) return;

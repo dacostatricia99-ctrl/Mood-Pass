@@ -55,7 +55,7 @@ serve(async (req) => {
     // FAILED / REJECTED are terminal failures; anything else is still in flight.
     const failed = status === 'FAILED' || status === 'REJECTED'
     return json({ paid: false, status: status ?? null, failed })
-  } catch (_e) {
+  } catch {
     return json({ paid: false })
   }
 })

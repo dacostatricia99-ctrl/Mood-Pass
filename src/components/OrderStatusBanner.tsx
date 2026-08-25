@@ -20,13 +20,15 @@ const STATUS: Record<TrackStatus, { key: TranslationKey; Icon: typeof Clock; col
  */
 export function OrderStatusBanner({ slug }: { slug?: string }) {
   const { t } = useTranslation();
-  const [order, setOrder] = useState<LastOrder | null>(null);
+  const [order, setOrder] = useState<LastOrder | null>(() => (slug ? getLastOrder(slug) : null));
   const [status, setStatus] = useState<TrackStatus>('new');
 
-  useEffect(() => {
-    if (!slug) return;
-    setOrder(getLastOrder(slug));
-  }, [slug]);
+  // Re-read when the customer moves to another establishment.
+  const [loadedSlug, setLoadedSlug] = useState(slug);
+  if (slug !== loadedSlug) {
+    setLoadedSlug(slug);
+    setOrder(slug ? getLastOrder(slug) : null);
+  }
 
   useEffect(() => {
     if (!order) return;

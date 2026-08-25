@@ -12,9 +12,21 @@ type Phase = 'idle' | 'checking' | 'paid' | 'failed';
 const POLL_MS = 3000;
 const MAX_POLLS = 40; // ~2 min
 
+/** 'checking' as soon as there is a payment worth watching for this slug. */
+function openingPhase(slug?: string): Phase {
+  return slug && getPendingPayment(slug) ? 'checking' : 'idle';
+}
+
 export function PaymentReturnWatcher({ slug }: { slug?: string }) {
   const { t } = useTranslation();
-  const [phase, setPhase] = useState<Phase>('idle');
+  const [phase, setPhase] = useState<Phase>(() => openingPhase(slug));
+
+  // Re-arm when the customer moves to another establishment.
+  const [watchedSlug, setWatchedSlug] = useState(slug);
+  if (slug !== watchedSlug) {
+    setWatchedSlug(slug);
+    setPhase(openingPhase(slug));
+  }
 
   useEffect(() => {
     if (!slug) return;
@@ -23,7 +35,6 @@ export function PaymentReturnWatcher({ slug }: { slug?: string }) {
 
     let active = true;
     let tries = 0;
-    setPhase('checking');
 
     const tick = async () => {
       if (!active) return;
