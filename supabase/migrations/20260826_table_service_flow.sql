@@ -17,19 +17,39 @@
 -- migrates to. `completed` now means something new — served and settled.
 
 -- 1. Order lifecycle -------------------------------------------------------
-ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_status_check;
+--
+-- The remap runs only while the column still holds the old vocabulary. Applied
+-- a second time it would read `completed` in its NEW sense — an order served
+-- and settled — and send it back to `ready`, silently reopening closed orders.
+-- `supabase db push` runs a migration once, but this file is also the thing
+-- someone pastes into the SQL editor, so it guards itself.
+DO $$
+DECLARE
+    already_migrated BOOLEAN;
+BEGIN
+    already_migrated := EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = 'public.orders'::regclass
+          AND conname = 'orders_status_check'
+          AND pg_get_constraintdef(oid) LIKE '%served%'
+    );
 
-UPDATE public.orders SET status = CASE status
-    WHEN 'pending'   THEN 'new'
-    WHEN 'accepted'  THEN 'preparing'
-    WHEN 'completed' THEN 'ready'
-    ELSE status
-END
-WHERE status IN ('pending', 'accepted', 'completed');
+    ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_status_check;
 
-ALTER TABLE public.orders ALTER COLUMN status SET DEFAULT 'new';
-ALTER TABLE public.orders ADD CONSTRAINT orders_status_check
-    CHECK (status IN ('new', 'preparing', 'ready', 'served', 'completed', 'cancelled'));
+    IF NOT already_migrated THEN
+        UPDATE public.orders SET status = CASE status
+            WHEN 'pending'   THEN 'new'
+            WHEN 'accepted'  THEN 'preparing'
+            WHEN 'completed' THEN 'ready'
+            ELSE status
+        END
+        WHERE status IN ('pending', 'accepted', 'completed');
+    END IF;
+
+    ALTER TABLE public.orders ALTER COLUMN status SET DEFAULT 'new';
+    ALTER TABLE public.orders ADD CONSTRAINT orders_status_check
+        CHECK (status IN ('new', 'preparing', 'ready', 'served', 'completed', 'cancelled'));
+END $$;
 
 -- 2. Payment lifecycle -----------------------------------------------------
 --    `cash_pending` is the window between the server bringing the bill to the
