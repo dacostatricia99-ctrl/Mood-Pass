@@ -118,10 +118,15 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
     onChanged?.();
   };
 
-  const confirmCash = async (order: OrderView, cash: number) => {
+  /**
+   * Settles an order. `cash` is what the customer physically handed over, and
+   * is recorded only for a cash payment — a mobile-money order never involved
+   * any, so leaving it null keeps the column meaning what it says.
+   */
+  const settle = async (order: OrderView, cash?: number) => {
     setSettling(null);
     setReceived('');
-    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, paymentStatus: 'paid', cashReceived: cash } : o)));
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, paymentStatus: 'paid', cashReceived: cash ?? null } : o)));
     if (isConfigured) {
       try {
         await setOrderPaid(order.id, cash);
@@ -231,7 +236,7 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
                     <span style={{ fontSize: 'var(--font-xs)', color: 'var(--primary-red)' }}>{t('orders.cash.insufficient')}</span>
                   )}
                   <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                    {actionBtn(t('orders.cash.confirm'), <Check size={16} />, '#16a34a', () => confirmCash(order, cash), !cashValid)}
+                    {actionBtn(t('orders.cash.confirm'), <Check size={16} />, '#16a34a', () => settle(order, cash), !cashValid)}
                     {actionBtn(t('orders.cash.cancelPad'), <X size={16} />, SECONDARY_BG, () => { setSettling(null); setReceived(''); })}
                   </div>
                 </div>
@@ -247,7 +252,7 @@ export function OrdersList({ establishmentId, currency, isConfigured, onChanged,
             {/* Non-cash orders keep the plain "mark as paid" confirmation. */}
             {!isCash && !settled && order.status !== 'cancelled' && (
               <button
-                onClick={() => confirmCash(order, order.total)}
+                onClick={() => settle(order)}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-glass)', background: 'transparent', color: '#16a34a', fontWeight: 600, fontSize: 'var(--font-sm)', cursor: 'pointer' }}
               >
                 <Wallet size={14} /> {t('orders.markPaid')}

@@ -3,7 +3,6 @@ import {
   changeDue,
   nextOrderStatus,
   KITCHEN_STATUSES,
-  OPEN_STATUSES,
   type OrderStatus,
 } from './managerApi';
 
@@ -31,11 +30,6 @@ describe('order lifecycle', () => {
     // Once ready, the order belongs to the floor, not the kitchen.
     expect(KITCHEN_STATUSES).toEqual(['new', 'preparing']);
     expect(KITCHEN_STATUSES).not.toContain('ready');
-  });
-
-  it('treats everything up to served as still open', () => {
-    expect(OPEN_STATUSES).toEqual(['new', 'preparing', 'ready', 'served']);
-    expect(OPEN_STATUSES).not.toContain('completed');
   });
 });
 

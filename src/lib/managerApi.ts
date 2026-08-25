@@ -18,9 +18,6 @@ export type PaymentStatus = 'unpaid' | 'pending' | 'cash_pending' | 'paid';
 /** The kitchen's queue: what still has to be cooked. */
 export const KITCHEN_STATUSES: OrderStatus[] = ['new', 'preparing'];
 
-/** Still on the floor — the server has something left to do with it. */
-export const OPEN_STATUSES: OrderStatus[] = ['new', 'preparing', 'ready', 'served'];
-
 /** What the order becomes when the current step is done, or null at the end. */
 export function nextOrderStatus(status: OrderStatus): OrderStatus | null {
   switch (status) {
