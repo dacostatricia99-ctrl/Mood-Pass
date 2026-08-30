@@ -8,7 +8,7 @@ import { BrandLogo } from '../components/BrandLogo';
 import { useAuth } from '../lib/AuthContext';
 import {
   fetchEstablishmentBySlug,
-  fetchOrders,
+  fetchKitchenOrders,
   updateOrderStatus,
   subscribeToOrders,
   type OrderView,
@@ -17,8 +17,8 @@ import {
 import { playOrderChime, requestNotificationPermission, showOrderNotification } from '../lib/notifications';
 
 const DEMO_ORDERS: OrderView[] = [
-  { id: 'k1', reference: '#A1B2C3', tableNumber: '4', total: 0, status: 'pending', paymentMethod: 'cash', paymentStatus: 'unpaid', createdAt: new Date(Date.now() - 2 * 60000).toISOString(), items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Frites' }] },
-  { id: 'k2', reference: '#D4E5F6', tableNumber: '7', total: 0, status: 'accepted', paymentMethod: 'mobile_money', paymentStatus: 'paid', createdAt: new Date(Date.now() - 6 * 60000).toISOString(), items: [{ quantity: 1, name: 'Pizza Diabola' }] },
+  { id: 'k1', reference: '#A1B2C3', tableNumber: '4', total: 0, status: 'new', paymentMethod: 'cash', paymentStatus: 'unpaid', cashReceived: null, createdAt: new Date(Date.now() - 2 * 60000).toISOString(), items: [{ quantity: 2, name: 'Burger Royal' }, { quantity: 1, name: 'Frites' }] },
+  { id: 'k2', reference: '#D4E5F6', tableNumber: '7', total: 0, status: 'preparing', paymentMethod: 'cash', paymentStatus: 'unpaid', cashReceived: null, createdAt: new Date(Date.now() - 6 * 60000).toISOString(), items: [{ quantity: 1, name: 'Pizza Diabola' }] },
 ];
 
 function timeHHMM(iso: string): string {
@@ -36,8 +36,13 @@ export function KitchenDisplay() {
   const [establishmentId, setEstablishmentId] = useState<string | null>(null);
   const [orders, setOrders] = useState<OrderView[]>(() => (isConfigured ? [] : DEMO_ORDERS));
 
+  // Holds the latest translator for the realtime callback below, without making
+  // the subscription depend on it (which would re-subscribe on every language
+  // change). Synced in an effect: a ref must not be written during render.
   const tRef = useRef(t);
-  tRef.current = t;
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   useEffect(() => {
     requestNotificationPermission();
@@ -59,17 +64,23 @@ export function KitchenDisplay() {
   useEffect(() => {
     if (!isConfigured || !establishmentId) return;
     let active = true;
-    const load = () => fetchOrders(establishmentId).then((data) => {
+    const load = () => fetchKitchenOrders(establishmentId).then((data) => {
       if (active) setOrders(data);
     });
     load();
-    return subscribeToOrders(establishmentId, (event) => {
+    const unsubscribe = subscribeToOrders(establishmentId, (event) => {
       load();
       if (event === 'INSERT') {
         playOrderChime();
         showOrderNotification(tRef.current('notify.newOrderTitle'), tRef.current('notify.newOrderBody'));
       }
     });
+    return () => {
+      // Both halves matter: stop listening, and drop the result of any fetch
+      // still in flight so it cannot set state after this effect is torn down.
+      active = false;
+      unsubscribe();
+    };
   }, [isConfigured, establishmentId]);
 
   const changeStatus = async (id: string, status: OrderStatus) => {
@@ -78,7 +89,7 @@ export function KitchenDisplay() {
       try {
         await updateOrderStatus(id, status);
       } catch {
-        if (establishmentId) setOrders(await fetchOrders(establishmentId));
+        if (establishmentId) setOrders(await fetchKitchenOrders(establishmentId));
       }
     }
   };
@@ -111,14 +122,17 @@ export function KitchenDisplay() {
       ${items}
       <hr>
       <div class="foot">Mood Pass</div>
-      <script>window.onload = function(){ window.print(); }<\/script>
+      <script>window.onload = function(){ window.print(); }</script>
     </body></html>`);
     w.document.close();
   };
 
-  // Only orders the kitchen acts on, oldest first (FIFO).
+  // Real orders arrive FIFO from the query; sorted again here so the demo
+  // list (not backed by that query) obeys the same rule regardless of its
+  // own array order. Payment is deliberately never consulted: an unpaid
+  // order is cooked like any other.
   const active = orders
-    .filter((o) => o.status === 'pending' || o.status === 'accepted')
+    .filter((o) => o.status === 'new' || o.status === 'preparing')
     .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
 
   return (
@@ -141,7 +155,7 @@ export function KitchenDisplay() {
       ) : (
         <main style={{ padding: 'var(--space-md)', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-md)', alignItems: 'start' }}>
           {active.map((order) => {
-            const isNew = order.status === 'pending';
+            const isNew = order.status === 'new';
             const accent = isNew ? '#f59e0b' : 'var(--primary-accent)';
             return (
               <div key={order.id} className="glass-panel" style={{ display: 'flex', flexDirection: 'column', borderTop: `4px solid ${accent}`, overflow: 'hidden' }}>
@@ -174,14 +188,14 @@ export function KitchenDisplay() {
                 <div style={{ padding: 'var(--space-md)', paddingTop: 0 }}>
                   {isNew ? (
                     <button
-                      onClick={() => changeStatus(order.id, 'accepted')}
+                      onClick={() => changeStatus(order.id, 'preparing')}
                       style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: '#f59e0b', color: 'white', fontWeight: 700, cursor: 'pointer' }}
                     >
                       <Check size={18} /> {t('kitchen.start')}
                     </button>
                   ) : (
                     <button
-                      onClick={() => changeStatus(order.id, 'completed')}
+                      onClick={() => changeStatus(order.id, 'ready')}
                       style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: '#16a34a', color: 'white', fontWeight: 700, cursor: 'pointer' }}
                     >
                       <CheckCheck size={18} /> {t('kitchen.markReady')}

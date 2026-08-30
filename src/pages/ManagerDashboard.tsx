@@ -43,9 +43,12 @@ export function ManagerDashboard() {
   const [pendingCount, setPendingCount] = useState<number | null>(isConfigured ? null : 4);
 
   // Keep the latest `t` reachable from the realtime callback without making the
-  // subscription depend on it (which would re-subscribe on every language change).
+  // subscription depend on it (which would re-subscribe on every language
+  // change). Synced in an effect: a ref must not be written during render.
   const tRef = useRef(t);
-  tRef.current = t;
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   // Ask for browser-notification permission once on the dashboard.
   useEffect(() => {

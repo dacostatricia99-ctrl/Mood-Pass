@@ -1,9 +1,38 @@
 import type { Category, LocalizedField, Product } from '../types';
 import { supabase } from './supabase';
 
-export type OrderStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
+/**
+ * Where the food is. Never gated by payment — the kitchen starts cooking the
+ * moment the customer validates, whether or not the bill has been settled.
+ */
+export type OrderStatus = 'new' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+
+/**
+ * Where the money is. `cash_pending` is the window between the server bringing
+ * the bill to the table and the cash changing hands; `pending` is a
+ * mobile-money deposit in flight with the provider.
+ */
 export type PaymentMethod = 'cash' | 'mobile_money';
-export type PaymentStatus = 'unpaid' | 'pending' | 'paid';
+export type PaymentStatus = 'unpaid' | 'pending' | 'cash_pending' | 'paid';
+
+/** The kitchen's queue: what still has to be cooked. */
+export const KITCHEN_STATUSES: OrderStatus[] = ['new', 'preparing'];
+
+/** What the order becomes when the current step is done, or null at the end. */
+export function nextOrderStatus(status: OrderStatus): OrderStatus | null {
+  switch (status) {
+    case 'new': return 'preparing';
+    case 'preparing': return 'ready';
+    case 'ready': return 'served';
+    case 'served': return 'completed';
+    default: return null;
+  }
+}
+
+/** Change owed back to the customer, floored at zero. */
+export function changeDue(total: number, received: number): number {
+  return Math.max(0, Math.round((received - total) * 100) / 100);
+}
 
 export interface OrderItemView {
   quantity: number;
@@ -19,6 +48,8 @@ export interface OrderView {
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  /** What the customer handed over in cash, once settled. */
+  cashReceived: number | null;
   createdAt: string;
   items: OrderItemView[];
 }
@@ -187,14 +218,14 @@ export async function fetchEstablishmentBySlug(slug: string): Promise<ManagerEst
   return { id: data.id, currency: (data.currency as string) ?? 'FCFA' };
 }
 
-/** Counts pending orders for an establishment (owner-only via RLS). */
+/** Counts orders still waiting for the kitchen (owner-only via RLS). */
 export async function countPendingOrders(establishmentId: string): Promise<number> {
   if (!supabase) return 0;
   const { count, error } = await supabase
     .from('orders')
     .select('id', { count: 'exact', head: true })
     .eq('establishment_id', establishmentId)
-    .eq('status', 'pending');
+    .eq('status', 'new');
   if (error) return 0;
   return count ?? 0;
 }
@@ -206,6 +237,7 @@ interface OrderRow {
   status: OrderStatus;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
+  cash_received: number | null;
   created_at: string;
   order_items: {
     quantity: number;
@@ -213,18 +245,18 @@ interface OrderRow {
   }[] | null;
 }
 
-/** Loads an establishment's orders (most recent first) with their line items. */
-export async function fetchOrders(establishmentId: string): Promise<OrderView[]> {
-  if (!supabase) return [];
-  const { data, error } = await supabase
-    .from('orders')
-    .select('id, table_number, total_amount, status, payment_method, payment_status, created_at, order_items(quantity, products(name, name_i18n))')
-    .eq('establishment_id', establishmentId)
-    .order('created_at', { ascending: false });
+const ORDER_COLUMNS =
+  'id, table_number, total_amount, status, payment_method, payment_status, cash_received, created_at, order_items(quantity, products(name, name_i18n))';
 
-  if (error || !data) return [];
+// A service can produce a lot of orders; every screen reading them is bounded so
+// none of them degrades into fetching the establishment's entire history.
+const KITCHEN_LIMIT = 100;
+const FLOOR_LIMIT = 100;
+/** How far back the floor view still shows orders it has finished with. */
+const SETTLED_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-  return (data as OrderRow[]).map((row) => ({
+function toOrderViews(rows: OrderRow[]): OrderView[] {
+  return rows.map((row) => ({
     id: row.id,
     reference: shortRef(row.id),
     tableNumber: row.table_number,
@@ -232,6 +264,7 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
     status: row.status,
     paymentMethod: row.payment_method ?? 'cash',
     paymentStatus: row.payment_status ?? 'unpaid',
+    cashReceived: row.cash_received,
     createdAt: row.created_at,
     items: (row.order_items ?? []).map((item) => {
       const product = Array.isArray(item.products) ? item.products[0] : item.products;
@@ -244,21 +277,172 @@ export async function fetchOrders(establishmentId: string): Promise<OrderView[]>
   }));
 }
 
-/** Updates an order's status (owner-only via RLS). */
+/** Orders the kitchen still has to cook, oldest first (FIFO). */
+export async function fetchKitchenOrders(establishmentId: string): Promise<OrderView[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('orders')
+    .select(ORDER_COLUMNS)
+    .eq('establishment_id', establishmentId)
+    .in('status', KITCHEN_STATUSES)
+    .order('created_at', { ascending: true })
+    .limit(KITCHEN_LIMIT);
+  if (error || !data) return [];
+  return toOrderViews(data as OrderRow[]);
+}
+
+/**
+ * What the floor still has to deal with, plus what it settled in the last day.
+ *
+ * Two queries rather than one `or(...)`: an order left open overnight must not
+ * fall out of the only screen that can close it, while finished orders should
+ * not accumulate on it forever. Newest first.
+ */
+export async function fetchFloorOrders(establishmentId: string): Promise<OrderView[]> {
+  if (!supabase) return [];
+  const since = new Date(Date.now() - SETTLED_WINDOW_MS).toISOString();
+
+  const [open, recent] = await Promise.all([
+    supabase
+      .from('orders')
+      .select(ORDER_COLUMNS)
+      .eq('establishment_id', establishmentId)
+      .in('status', ['new', 'preparing', 'ready', 'served'])
+      .order('created_at', { ascending: false })
+      .limit(FLOOR_LIMIT),
+    supabase
+      .from('orders')
+      .select(ORDER_COLUMNS)
+      .eq('establishment_id', establishmentId)
+      .in('status', ['completed', 'cancelled'])
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(FLOOR_LIMIT),
+  ]);
+
+  // A query that errors leaves its half of the floor silently empty otherwise,
+  // which reads as "nothing to do" rather than as the failure it is.
+  if (open.error) console.error('fetchFloorOrders: open orders query failed', open.error);
+  if (recent.error) console.error('fetchFloorOrders: recent orders query failed', recent.error);
+  if (open.error && recent.error) return [];
+  // The two status sets are disjoint, so concatenating cannot duplicate a row.
+  const rows = [...((open.data ?? []) as OrderRow[]), ...((recent.data ?? []) as OrderRow[])];
+  return toOrderViews(rows).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+}
+
+export interface OrderStats {
+  revenueToday: number;
+  ordersToday: number;
+  totalRevenue: number;
+  orders: number;
+  topProducts: { name: string; nameI18n?: LocalizedField; qty: number }[];
+  days: { date: string; value: number }[];
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Local midnight, the day boundary the restaurant actually works to. */
+export function startOfToday(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * The same aggregates as `get_order_stats`, over a list already in hand.
+ *
+ * Only the bundled demo data goes through this — with a backend the database
+ * does the work, so the numbers stay right however many orders there are.
+ */
+export function computeStats(orders: OrderView[], dayStart: Date): OrderStats {
+  const valid = orders.filter((o) => o.status !== 'cancelled');
+  const start = dayStart.getTime();
+  const today = valid.filter((o) => +new Date(o.createdAt) >= start);
+
+  const byProduct = new Map<string, { name: string; nameI18n?: LocalizedField; qty: number }>();
+  for (const o of valid) {
+    for (const it of o.items) {
+      const cur = byProduct.get(it.name) ?? { name: it.name, nameI18n: it.nameI18n, qty: 0 };
+      cur.qty += it.quantity;
+      byProduct.set(it.name, cur);
+    }
+  }
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const from = start - (6 - i) * DAY_MS;
+    const value = valid
+      .filter((o) => {
+        const c = +new Date(o.createdAt);
+        return c >= from && c < from + DAY_MS;
+      })
+      .reduce((s, o) => s + o.total, 0);
+    return { date: new Date(from).toISOString(), value };
+  });
+
+  return {
+    revenueToday: today.reduce((s, o) => s + o.total, 0),
+    ordersToday: today.length,
+    totalRevenue: valid.reduce((s, o) => s + o.total, 0),
+    orders: valid.length,
+    topProducts: [...byProduct.values()]
+      .sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name))
+      .slice(0, 5),
+    days,
+  };
+}
+
+/**
+ * Aggregates for the stats screen, computed in the database.
+ *
+ * `dayStart` is the caller's own start-of-today, so the day boundaries follow
+ * the restaurant's timezone rather than the server's.
+ */
+export async function fetchOrderStats(establishmentId: string, dayStart: Date): Promise<OrderStats | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc('get_order_stats', {
+    est_id: establishmentId,
+    day_start: dayStart.toISOString(),
+  });
+  if (error || !data) return null;
+  return data as OrderStats;
+}
+
+/**
+ * Moves an order along its lifecycle (owner-only via RLS). Payment is never
+ * consulted here: the kitchen advances whether or not the bill is settled. The
+ * one exception lives in the database — closing an order requires it to be
+ * paid — and surfaces as a thrown error the caller resyncs from.
+ */
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
   if (error) throw error;
-  // When the order becomes ready, push a notification to the customer.
-  if (status === 'completed') {
+  // The food is ready: tell the customer so they stop watching the door.
+  if (status === 'ready') {
     supabase.functions.invoke('notify-order-ready', { body: { order_id: orderId } }).catch(() => {});
   }
 }
 
-/** Marks an order as paid — used by the manager to confirm a cash payment. */
-export async function setOrderPaid(orderId: string): Promise<void> {
+/**
+ * The server has taken the bill to the table and is waiting on the cash. Kept
+ * distinct from `unpaid` so the floor can see which tables are mid-settlement.
+ */
+export async function requestBill(orderId: string): Promise<void> {
   if (!supabase) return;
-  const { error } = await supabase.from('orders').update({ payment_status: 'paid' }).eq('id', orderId);
+  const { error } = await supabase.from('orders').update({ payment_status: 'cash_pending' }).eq('id', orderId);
+  if (error) throw error;
+}
+
+/**
+ * Confirms cash received at the table. `received` is what the customer handed
+ * over, recorded so the change given back is auditable; pass nothing when it
+ * was the exact amount.
+ */
+export async function setOrderPaid(orderId: string, received?: number): Promise<void> {
+  if (!supabase) return;
+  const patch: { payment_status: PaymentStatus; cash_received?: number } = { payment_status: 'paid' };
+  if (received !== undefined) patch.cash_received = received;
+  const { error } = await supabase.from('orders').update(patch).eq('id', orderId);
   if (error) throw error;
 }
 

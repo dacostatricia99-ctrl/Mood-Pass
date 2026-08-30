@@ -12,9 +12,15 @@ export function QRCodeModal({ slug, onClose }: QRCodeModalProps) {
   const { t } = useTranslation();
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  // One sticker per table: the scanned code carries the table along, so the
+  // seated customer never has to know or type their own table number. Left
+  // empty, this is the generic menu code (the customer is then asked).
+  const [table, setTable] = useState('');
 
-  // Derive full URL assuming current origin
-  const customerUrl = `${window.location.origin}/e/${slug}`;
+  const trimmedTable = table.trim();
+  const customerUrl = trimmedTable
+    ? `${window.location.origin}/e/${slug}?table=${encodeURIComponent(trimmedTable)}`
+    : `${window.location.origin}/e/${slug}`;
 
   useEffect(() => {
     QRCode.toDataURL(customerUrl, {
@@ -71,10 +77,23 @@ export function QRCodeModal({ slug, onClose }: QRCodeModalProps) {
           </div>
         )}
 
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>{t('qr.tableLabel')}</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={table}
+            onChange={(e) => setTable(e.target.value)}
+            placeholder={t('qr.tablePlaceholder')}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-glass)', background: 'var(--bg-surface)', color: 'var(--text-primary)', outline: 'none' }}
+          />
+          <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>{t('qr.tableHint')}</span>
+        </div>
+
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <a
             href={qrDataUrl}
-            download={`QR_${slug}.png`}
+            download={trimmedTable ? `QR_${slug}_table_${trimmedTable}.png` : `QR_${slug}.png`}
             className="btn-primary"
             style={{ width: '100%', justifyContent: 'center', textDecoration: 'none' }}
           >

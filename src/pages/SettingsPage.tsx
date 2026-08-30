@@ -37,15 +37,13 @@ export function SettingsPage() {
   const [savedDetails, setSavedDetails] = useState(false);
   const [savingDetails, setSavingDetails] = useState(false);
   const [cfg, setCfg] = useState<PaymentConfig>(EMPTY);
-  const [loading, setLoading] = useState(true);
+  // Nothing is fetched without a backend and a slug, so it never starts loading.
+  const [loading, setLoading] = useState(isConfigured && !!slug);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!isConfigured || !slug) {
-      setLoading(false);
-      return;
-    }
+    if (!isConfigured || !slug) return;
     let active = true;
     getEstablishmentSettings(slug).then(async (est) => {
       if (!active || !est) return;

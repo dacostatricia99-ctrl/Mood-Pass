@@ -32,12 +32,17 @@ serve(async (req) => {
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
-      .select('id, total_amount, payment_status, establishment_id')
+      .select('id, total_amount, payment_status, payment_ref, establishment_id')
       .eq('id', order_id)
       .single()
     if (orderErr || !order) throw new Error('Order not found')
     if (order.establishment_id !== establishment_id) throw new Error('Order/establishment mismatch')
     if (order.payment_status === 'paid') return json({ paid: true })
+    if (order.payment_ref) throw new Error('A payment is already in progress for this order')
+
+    // Fail fast before touching anything. The authoritative amount is read back
+    // from the locked row further down.
+    if (!(Number(order.total_amount) > 0)) throw new Error('Order has no payable amount')
 
     const { data: cfg } = await admin
       .from('payment_configs')
@@ -60,6 +65,39 @@ serve(async (req) => {
     // --- PawaPay Payment Page ----------------------------------------------
     // depositId is a fresh UUID stored on the order so the callback can map back.
     const depositId = crypto.randomUUID()
+
+    // Freeze the basket BEFORE the amount is handed to the provider. Setting
+    // payment_ref is what makes the order_items trigger refuse new lines, so
+    // arming it first closes the window where a line could be appended after
+    // the amount was fixed but before the order was locked — which would have
+    // let a customer be served more food than the payment page charges for.
+    // The `is null` guard makes this the single winner if two payments race.
+    const { data: locked } = await admin
+      .from('orders')
+      .update({ payment_ref: depositId, payment_status: 'pending' })
+      .eq('id', order_id)
+      .is('payment_ref', null)
+      .select('total_amount')
+      .maybeSingle()
+    if (!locked) throw new Error('A payment is already in progress for this order')
+
+    // Releases the basket so the customer can retry after a failed attempt.
+    // Scoped to our own depositId so a concurrent attempt is never unlocked.
+    const releaseLock = () =>
+      admin
+        .from('orders')
+        .update({ payment_ref: null, payment_status: order.payment_status })
+        .eq('id', order_id)
+        .eq('payment_ref', depositId)
+
+    // Read back from the locked row: no line can be added past this point, so
+    // this is the amount the customer will actually owe.
+    const amountDue = Number(locked.total_amount)
+    if (!Number.isFinite(amountDue) || amountDue <= 0) {
+      await releaseLock()
+      throw new Error('Order has no payable amount')
+    }
+
     const base = cfg.sandbox ? 'https://api.sandbox.pawapay.io' : 'https://api.pawapay.io'
     // Each country has its own currency. "FCFA" is XOF (West) or XAF (Central);
     // DR Congo uses CDF. Explicit map so the amount is charged in the right one.
@@ -73,28 +111,36 @@ serve(async (req) => {
     }
     const country = (cfg.country || 'CIV').toUpperCase()
     const currency = CURRENCY[country] ?? 'XOF'
-    const amount = String(Math.round(Number(order.total_amount)))
+    const amount = String(Math.round(amountDue))
 
-    const ppRes = await fetch(`${base}/v2/paymentpage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.api_key}` },
-      body: JSON.stringify({
-        depositId,
-        returnUrl: return_url ?? Deno.env.get('SUPABASE_URL'),
-        amountDetails: { amount, currency },
-        country,
-        reason: `Commande ${String(order_id).slice(0, 8)}`,
-        metadata: [{ orderId: String(order_id) }],
-      }),
-    })
-    const pp = await ppRes.json()
-    if (!ppRes.ok || !pp?.redirectUrl) {
-      throw new Error(pp?.failureReason?.failureMessage || pp?.message || 'PawaPay init failed')
+    let redirectUrl: string
+    try {
+      const ppRes = await fetch(`${base}/v2/paymentpage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.api_key}` },
+        body: JSON.stringify({
+          depositId,
+          returnUrl: return_url ?? Deno.env.get('SUPABASE_URL'),
+          amountDetails: { amount, currency },
+          country,
+          reason: `Commande ${String(order_id).slice(0, 8)}`,
+          metadata: [{ orderId: String(order_id) }],
+        }),
+      })
+      const pp = await ppRes.json()
+      if (!ppRes.ok || !pp?.redirectUrl) {
+        throw new Error(pp?.failureReason?.failureMessage || pp?.message || 'PawaPay init failed')
+      }
+      redirectUrl = pp.redirectUrl
+    } catch (e) {
+      // The provider never took the payment, so leave the basket editable.
+      await releaseLock()
+      throw e
     }
 
-    // Remember the depositId + mark the order pending until the callback confirms.
-    await admin.from('orders').update({ payment_ref: depositId, payment_status: 'pending' }).eq('id', order_id)
-    return json({ payment_url: pp.redirectUrl })
+    // The order stays locked on depositId until the callback (or verify-payment)
+    // settles it.
+    return json({ payment_url: redirectUrl })
   } catch (error) {
     return json({ error: error.message }, 400)
   }

@@ -19,10 +19,9 @@ export function ManagerHome() {
   const [loading, setLoading] = useState(isConfigured);
 
   useEffect(() => {
-    if (!isConfigured) {
-      setLoading(false);
-      return;
-    }
+    // `loading` already starts as `isConfigured`, so there is nothing to reset
+    // here — with no backend it was never true in the first place.
+    if (!isConfigured) return;
     let active = true;
     fetchMyEstablishments().then(async (list) => {
       if (!active) return;
