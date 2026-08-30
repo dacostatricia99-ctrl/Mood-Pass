@@ -97,6 +97,22 @@ const LAST_ORDER_TTL_MS = 3 * 60 * 60 * 1000;
 const MAX_TRACKED_ORDERS = 20;
 
 /**
+ * Fired whenever the tracked-orders list changes, so a component that has
+ * already read it (OrderStatusBanner, mounted once per establishment visit)
+ * knows to re-read rather than showing a stale snapshot from mount time.
+ */
+export const ORDERS_CHANGED_EVENT = 'moodpass:orders-changed';
+
+function notifyOrdersChanged(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new Event(ORDERS_CHANGED_EVENT));
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
  * Reads the tracked orders, newest first, dropping expired ones.
  *
  * Tolerates the single-object shape this key used to hold, so a customer who
@@ -123,6 +139,7 @@ function writeTrackedOrders(list: LastOrder[]): void {
   } catch {
     /* storage unavailable — ignore */
   }
+  notifyOrdersChanged();
 }
 
 /**
@@ -156,6 +173,7 @@ export function clearLastOrder(id?: string): void {
     } catch {
       /* ignore */
     }
+    notifyOrdersChanged();
     return;
   }
   writeTrackedOrders(readTrackedOrders().filter((o) => o.id !== id));

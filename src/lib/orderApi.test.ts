@@ -7,6 +7,7 @@ import {
   getLastOrder,
   getPendingPayment,
   getTableOrders,
+  ORDERS_CHANGED_EVENT,
   saveLastOrder,
   savePendingPayment,
   verifyPayment,
@@ -193,6 +194,33 @@ describe('several orders from the same table', () => {
     store.set('moodpass.lastOrder', JSON.stringify({ ...food, ts: Date.now() }));
 
     expect(getLastOrder('chez-a')?.id).toBe('order-b');
+  });
+});
+
+describe('live update notification', () => {
+  // OrderStatusBanner is mounted once per establishment visit and keeps its
+  // own copy of the tracked orders in React state, so a write here is only
+  // useful to it if something tells it to re-read — this event is that
+  // signal. Runs with no window at all (the vitest default here), plus a
+  // stubbed one, to cover both a plain script context and the browser.
+  const order = { id: 'order-d', reference: '#DDD444', slug: 'chez-a', ts: Date.now() };
+
+  it('does not throw when there is no window to notify', () => {
+    expect(() => saveLastOrder(order)).not.toThrow();
+    expect(() => clearLastOrder(order.id)).not.toThrow();
+    expect(() => clearLastOrder()).not.toThrow();
+  });
+
+  it('fires on every write once a window exists', () => {
+    vi.stubGlobal('window', new EventTarget());
+    const heard: string[] = [];
+    window.addEventListener(ORDERS_CHANGED_EVENT, () => heard.push('changed'));
+
+    saveLastOrder(order);
+    clearLastOrder(order.id);
+    clearLastOrder();
+
+    expect(heard).toEqual(['changed', 'changed', 'changed']);
   });
 });
 
