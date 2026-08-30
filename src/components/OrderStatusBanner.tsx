@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Clock, ChefHat, PackageCheck, XCircle, CheckCircle, HandPlatter, X } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
-import { fetchOrderStatus, getLastOrder, clearLastOrder, type LastOrder, type TrackStatus } from '../lib/orderApi';
+import {
+  fetchOrderStatus,
+  getTableOrders,
+  clearLastOrder,
+  ORDERS_CHANGED_EVENT,
+  type LastOrder,
+  type TrackStatus,
+} from '../lib/orderApi';
 import { playOrderChime } from '../lib/notifications';
 import type { TranslationKey } from '../i18n/translations';
 
@@ -15,29 +22,61 @@ const STATUS: Record<TrackStatus, { key: TranslationKey; Icon: typeof Clock; col
 };
 
 /**
- * Floating banner that lets a customer follow their last order even after
- * closing the cart. Reads it from localStorage and polls its status.
+ * Floating stack that lets a customer follow every order still open at their
+ * table — a round of drinks, then food, then dessert are each their own order
+ * — even after closing the cart. Reads them from localStorage and polls each
+ * one's status independently.
  */
 export function OrderStatusBanner({ slug }: { slug?: string }) {
-  const { t } = useTranslation();
-  const [order, setOrder] = useState<LastOrder | null>(() => (slug ? getLastOrder(slug) : null));
-  const [status, setStatus] = useState<TrackStatus>('new');
+  const [orders, setOrders] = useState<LastOrder[]>(() => (slug ? getTableOrders(slug) : []));
 
   // Re-read when the customer moves to another establishment.
   const [loadedSlug, setLoadedSlug] = useState(slug);
   if (slug !== loadedSlug) {
     setLoadedSlug(slug);
-    setOrder(slug ? getLastOrder(slug) : null);
+    setOrders(slug ? getTableOrders(slug) : []);
   }
 
   useEffect(() => {
-    if (!order) return;
+    if (!slug) return;
+    // Checkout can add a new order (or another tab/redirect can clear one)
+    // without this component remounting, so react to the change rather than
+    // relying on a stale snapshot taken at mount time.
+    const reload = () => setOrders(getTableOrders(slug));
+    window.addEventListener(ORDERS_CHANGED_EVENT, reload);
+    window.addEventListener('storage', reload);
+    return () => {
+      window.removeEventListener(ORDERS_CHANGED_EVENT, reload);
+      window.removeEventListener('storage', reload);
+    };
+  }, [slug]);
+
+  if (orders.length === 0) return null;
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 'calc(var(--space-md) + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)',
+      zIndex: 30, width: 'calc(100% - 2 * var(--space-md))', maxWidth: 440,
+      display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)',
+    }}>
+      {orders.map((order) => (
+        <OrderStatusItem key={order.id} order={order} onDismiss={() => clearLastOrder(order.id)} />
+      ))}
+    </div>
+  );
+}
+
+function OrderStatusItem({ order, onDismiss }: { order: LastOrder; onDismiss: () => void }) {
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<TrackStatus>('new');
+
+  useEffect(() => {
     let active = true;
     let prev: TrackStatus | null = null;
     const poll = async () => {
       const s = await fetchOrderStatus(order.id);
       if (!active || !s) return;
-      // Alert the customer the moment the order becomes ready.
+      // Alert the customer the moment this order becomes ready.
       if (s === 'ready' && prev !== null && prev !== 'ready') {
         playOrderChime();
         try { navigator.vibrate?.(200); } catch { /* ignore */ }
@@ -51,20 +90,12 @@ export function OrderStatusBanner({ slug }: { slug?: string }) {
       active = false;
       window.clearInterval(iv);
     };
-  }, [order]);
-
-  if (!order) return null;
+  }, [order.id]);
 
   const meta = STATUS[status];
-  const dismiss = () => {
-    clearLastOrder(order.id);
-    setOrder(null);
-  };
 
   return (
     <div style={{
-      position: 'fixed', bottom: 'calc(var(--space-md) + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)',
-      zIndex: 30, width: 'calc(100% - 2 * var(--space-md))', maxWidth: 440,
       display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
       background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-glass)', borderLeft: `4px solid ${meta.color}`,
       borderRadius: 'var(--radius-md)', padding: '10px 12px', boxShadow: 'var(--shadow-card)',
@@ -76,7 +107,7 @@ export function OrderStatusBanner({ slug }: { slug?: string }) {
         <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>{order.reference}</div>
         <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t(meta.key)}</div>
       </div>
-      <button onClick={dismiss} aria-label="Close" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
+      <button onClick={onDismiss} aria-label="Close" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
         <X size={18} />
       </button>
     </div>
