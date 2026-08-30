@@ -320,6 +320,10 @@ export async function fetchFloorOrders(establishmentId: string): Promise<OrderVi
       .limit(FLOOR_LIMIT),
   ]);
 
+  // A query that errors leaves its half of the floor silently empty otherwise,
+  // which reads as "nothing to do" rather than as the failure it is.
+  if (open.error) console.error('fetchFloorOrders: open orders query failed', open.error);
+  if (recent.error) console.error('fetchFloorOrders: recent orders query failed', recent.error);
   if (open.error && recent.error) return [];
   // The two status sets are disjoint, so concatenating cannot duplicate a row.
   const rows = [...((open.data ?? []) as OrderRow[]), ...((recent.data ?? []) as OrderRow[])];

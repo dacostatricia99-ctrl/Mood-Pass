@@ -127,11 +127,13 @@ export function KitchenDisplay() {
     w.document.close();
   };
 
-  // Already narrowed to the kitchen queue and ordered FIFO by the query. The
-  // demo list is filtered here so it obeys the same rule without a backend.
-  // Payment is deliberately never consulted: an unpaid order is cooked like
-  // any other.
-  const active = orders.filter((o) => o.status === 'new' || o.status === 'preparing');
+  // Real orders arrive FIFO from the query; sorted again here so the demo
+  // list (not backed by that query) obeys the same rule regardless of its
+  // own array order. Payment is deliberately never consulted: an unpaid
+  // order is cooked like any other.
+  const active = orders
+    .filter((o) => o.status === 'new' || o.status === 'preparing')
+    .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--bg-color)' }}>
